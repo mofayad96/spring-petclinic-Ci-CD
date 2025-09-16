@@ -1,0 +1,12 @@
+# Dockerfile.jenkins
+FROM jenkins/jenkins:lts
+
+USER root
+
+# Install docker CLI + git + maven
+RUN apt-get update && \
+    apt-get install -y docker.io git maven && \
+    rm -rf /var/lib/apt/lists/*
+
+# Jenkins will run as root (so it can use Docker)
+USER root

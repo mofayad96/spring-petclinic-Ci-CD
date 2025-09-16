@@ -9,9 +9,9 @@ services:
     ports:
     - "5432:5432"
     volumes:
-      - sonardb_data:/var/lib/postgresql/data
+      - sonardb_data1:/var/lib/postgresql/data
     networks:
-      - sonarnet
+      - services
 
   sonarqube:
     image: sonarqube:latest
@@ -24,7 +24,7 @@ services:
       SONAR_JDBC_USERNAME: sonar
       SONAR_JDBC_PASSWORD: sonar
     networks:
-      - sonarnet
+      - services
 
   nexus:
     image: sonatype/nexus3 
@@ -33,6 +33,8 @@ services:
       - "8082:8082" # for nexus communication port
     volumes:
       - nexus_data:/nexus-data
+    networks:
+      - services
 
   promethues:
     image: prom/prometheus
@@ -41,36 +43,58 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - monitoring 
+      - services 
+
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins1
     container_name: jenkins-controller
-    user: root #to give to jenkins permission to talk to docker through socket
+    user: root
+    privileged: true   # allow Docker access
     ports:
-      - "9080:8080"   # Jenkins UI
-      - "50000:50000" # Agent communication port
+      - "9080:8080"
+      - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock   #  give controller access to Docker
+    environment:
+      DOCKER_HOST: tcp://docker:2375   # point Jenkins to DinD
+    depends_on:
+      - docker
     networks:
-      - jenkins-net
+      - services
+
+
+
+  
+
+
+
+  docker:
+    image: docker:20.10-dind
+    container_name: dind
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=   #  disable TLS so 2375 is plain HTTP
+    command: ["--host=tcp://0.0.0.0:2375", "--storage-driver=overlay2"]
+    volumes:
+      - docker-data:/var/lib/docker
+    networks:
+      - services
 
   grafana :
     image: grafana/grafana
     ports:
       - "3000:3000"
     networks:
-      - monitoring
+      - services
   
 
 volumes:
-  sonardb_data:
+  sonardb_data1:
   nexus_data:
   jenkins_home:
+  docker-data:
 networks:
-  sonarnet:
-    driver: bridge
-  monitoring:
-    driver: bridge
-  jenkins-net:
+  services:
     driver: bridge
