@@ -18,7 +18,7 @@ jobs:
             java-version: 17
             distribution: temurin
         - name: build code using maven and skipping tests
-          run:  mvn package -DskipTests    
+          run:  mvn clean install -DskipTests    
         - name: SonarCloud Scan
           uses: sonarsource/sonarcloud-github-action@master
           with:
