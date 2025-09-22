@@ -25,7 +25,7 @@ jobs:
             args: >
               -Dsonar.projectKey=mofayad96_spring-petclinic
               -Dsonar.organization=mofayad96
+              -Dsonar.java.binaries=**/target/classes
           env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             
-        
