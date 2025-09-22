@@ -19,23 +19,13 @@ jobs:
             distribution: temurin
         - name: build code using maven and skipping tests
           run:  mvn package -DskipTests    
-        - name: Cache SonarQube packages
-          uses: actions/cache@v4
+        - name: SonarCloud Scan
+          uses: sonarsource/sonarcloud-github-action@master
           with:
-            path: ~/.sonar/cache
-            key: ${{ runner.os }}-sonar
-            restore-keys: ${{ runner.os }}-sonar
-        - name: Cache Maven packages
-          uses: actions/cache@v4
-          with:
-            path: ~/.m2
-            key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-            restore-keys: ${{ runner.os }}-m2
-        - name: Build and analyze
+            args: >
+              -Dsonar.projectKey=mofayad96_spring-petclinic
+              -Dsonar.organization=mofayad96
           env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=spring-petclinic -Dsonar.projectName='spring-petclinic'
-            
             
         
