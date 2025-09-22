@@ -46,7 +46,7 @@ jobs:
           with:
             payload: |
               {
-                "text": ":rocket: Build finished for *${{ github.repository }}* on branch *${{ github.ref_name }}* \nStatus: ${{ job.status }}"
+                "text": " Build finished for *${{ github.repository }}* on branch *${{ github.ref_name }}* \nStatus: ${{ job.status }}"
               }
           env:
             SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
