@@ -20,9 +20,9 @@ jobs:
         - name: build code using maven and skipping tests
           run:  mvn clean install -DskipTests    
         - name: SonarCloud Scan (Maven plugin)
-          run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar \
-                -DskipTests 
-                -Dsonar.projectKey=mofayad96_spring-petclinic 
-                -Dsonar.organization=mofayad96 
-                -Dsonar.host.url=https://sonarcloud.io 
-                -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          run: mvn clean install sonar:sonar \
+              -DskipTests \
+              -Dsonar.projectKey=mofayad96_spring-petclinic \
+              -Dsonar.organization=mofayad96 \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
