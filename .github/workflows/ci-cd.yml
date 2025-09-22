@@ -41,3 +41,12 @@ jobs:
             file: Dockerfile.multistage
             push: true
             tags:  deaddeal96/spring-petclinic-githubactions:latest
+        - name: Notify Slack
+          uses: slackapi/slack-github-action@v1.27.0
+          with:
+            payload: |
+              {
+                "text": ":rocket: Build finished for *${{ github.repository }}* on branch *${{ github.ref_name }}* \nStatus: ${{ job.status }}"
+              }
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
