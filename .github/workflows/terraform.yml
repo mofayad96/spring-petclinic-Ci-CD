@@ -1,0 +1,26 @@
+on:
+  workflow_dispatch: 
+    inputs:
+      environment:
+        description: "choose environment"
+        required: true
+        default: "staging"
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: checkout repository
+          uses: actions/checkout@v4
+          
+        - name: setup terraform
+          uses:  hashicorp/setup-terraform@v2.0.3
+          with: 
+            terraform_version: 1.9.8 
+        - name: terraform init
+          working-directory: terraform
+          run: terraform init
+        - name: terraform plan
+          working-directory: terraform
+          run: terraform plan
+          
