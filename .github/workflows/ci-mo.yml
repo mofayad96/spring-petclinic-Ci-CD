@@ -1,3 +1,4 @@
+name: ci of springpetclinic
 on:
   workflow_dispatch: 
     inputs:

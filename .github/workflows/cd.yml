@@ -1,3 +1,4 @@
+name: cd of springpetclinic
 on:
   workflow_dispatch: 
     inputs:
