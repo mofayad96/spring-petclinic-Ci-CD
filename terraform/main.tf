@@ -97,3 +97,6 @@ resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
 
+output "app_instance_id" {
+  value = aws_instance.app_server.id
+}

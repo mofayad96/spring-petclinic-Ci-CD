@@ -13,35 +13,7 @@ jobs:
     steps:
         - name: checkout repository
           uses: actions/checkout@v4
-        - name: setup terraform
-          uses: hashicorp/setup-terraform@v2.0.3
-          with: 
-            terraform_version: 1.9.8 
-        - name: terraform init
-          working-directory: terraform
-          run: terraform init
-        - name: terraform plan
-          working-directory: terraform
-          run: terraform plan
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        - name: terraform apply
-          working-directory: terraform
-          run: terraform apply -auto-approve 
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-        - name: Get EC2 instance ID
-          id: get_instance
-          working-directory: terraform
-          run: |
-            INSTANCE_ID=$(terraform output -raw app_instance_id || echo "none")
-            echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
-
-        - name: Use instance ID
-          run: echo "Deploying to instance $INSTANCE_ID"
+          
         - name: aws credntials
           uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
           with:
