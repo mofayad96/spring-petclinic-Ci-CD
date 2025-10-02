@@ -38,11 +38,10 @@ jobs:
           run: echo "INSTANCE_ID=$(terraform output -raw app_instance_id)" >> $GITHUB_ENV
         - name: Use instance ID
           run: echo "Deploying to instance $INSTANCE_ID"
-
         - name: aws credntials
           uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
           with:
             aws-region: eu-central-1
-            aws-access-key-id: ${{ AWS_GITHUB_ACTIONS_ID }}
-            aws-secret-access-key: ${{ AWS_GITHUB_ACTIONS_SECRET }}
+            aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET }}
           
