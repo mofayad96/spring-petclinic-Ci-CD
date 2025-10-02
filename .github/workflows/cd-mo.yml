@@ -23,25 +23,50 @@ jobs:
           
         - name: download docker on EC2
           run: |
-            aws ssm send-command \
-              --targets "Key=instanceIds,Values=i-0379a48940c4be135" \
+              INSTANCE_ID=i-0379a48940c4be135
+
+              # Send the command
+              CMD_ID=$(aws ssm send-command \
+                --targets "Key=instanceIds,Values=$INSTANCE_ID" \
+                --document-name "AWS-RunShellScript" \
+                --parameters 'commands=[
+                  "sudo apt-get update -y",
+                  "sudo apt-get install -y ca-certificates curl gnupg",
+                  "sudo install -m 0755 -d /etc/apt/keyrings",
+                  "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
+                  "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+                  "sudo apt-get update -y",
+                  "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
+                  "sudo systemctl enable docker",
+                  "sudo systemctl start docker"
+                ]' \
+                --query "Command.CommandId" --output text)
+
+              echo "Sent command $CMD_ID, waiting for it to finish..."
+
+              # Wait for completion
+              aws ssm wait command-executed --command-id $CMD_ID --instance-id $INSTANCE_ID
+
+              # Show the output
+              aws ssm list-command-invocations \
+                --command-id $CMD_ID \
+                --instance-id $INSTANCE_ID \
+                --details
+        - name: Pull image and start container
+          run: |
+            INSTANCE_ID=i-0379a48940c4be135
+
+            CMD_ID=$(aws ssm send-command \
+              --targets "Key=instanceIds,Values=$INSTANCE_ID" \
               --document-name "AWS-RunShellScript" \
               --parameters 'commands=[
-                "sudo apt-get update -y",
-                "sudo apt-get install -y ca-certificates curl gnupg",
-                "sudo install -m 0755 -d /etc/apt/keyrings",
-                "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
-                "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
-                "sudo apt-get update -y",
-                "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
-                "sudo systemctl enable docker",
-                "sudo systemctl start docker"
-              ]'
-        - name: pull image from docker hub , start container 
-          run: |
-            aws ssm send-command \
-            --targets "Key=instanceIds,Values=i-0379a48940c4be135" \
-            --document-name "AWS-RunShellScript" \
-            --parameters 'commands=[
-            "sudo docker container run -d --name web -p 8080:8080 deaddeal96/spring-petclinic-githubactions:latest"
-            ]'
+                "sudo docker container run -d --name web -p 8080:8080 deaddeal96/spring-petclinic-githubactions:latest"
+              ]' \
+              --query "Command.CommandId" --output text)
+
+            echo "Sent container run command $CMD_ID, waiting for it to finish..."
+
+            aws ssm wait command-executed --command-id $CMD_ID --instance-id $INSTANCE_ID
+
+            aws ssm list-command-invocations --command-id $CMD_ID --instance-id $INSTANCE_ID --details
+
