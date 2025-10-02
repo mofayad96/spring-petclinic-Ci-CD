@@ -96,3 +96,18 @@ jobs:
 
             aws ssm list-command-invocations --command-id $CMD_ID --instance-id $INSTANCE_ID --details
 
+        - name: Get EC2 public IP
+          run: |
+            echo "PUBLIC_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=Spring-petclinic_app" "Name=instance-state-name,Values=running" \
+              --query "Reservations[0].Instances[0].PublicIpAddress" --output text)" >> $GITHUB_ENV
+
+        - name: Notify Slack
+                  uses: slackapi/slack-github-action@v1.27.0
+                  with:
+                    payload: |
+                      {
+                        "text": " Your app now works on ip ${{ PUBLIC_IP }} "
+                      }
+                  env:
+                    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
