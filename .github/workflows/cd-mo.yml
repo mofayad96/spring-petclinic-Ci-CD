@@ -13,17 +13,25 @@ jobs:
     steps:
         - name: checkout repository
           uses: actions/checkout@v4
-
         - name: aws credntials
           uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
           with:
             aws-region: eu-central-1
             aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET }}
+            aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET }}          
+        - name: Get EC2 instance ID
+          id: get_instance
+          run: |
+            INSTANCE_ID=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=Spring-petclinic_app" "Name=instance-state-name,Values=running" \
+              --query "Reservations[*].Instances[*].InstanceId" \
+              --output text)
+            echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+
           
         - name: download docker on EC2
           run: |
-              INSTANCE_ID=i-0e38b3458f8db6da4
+              
 
               # Send the command
               CMD_ID=$(aws ssm send-command \
@@ -54,7 +62,6 @@ jobs:
                 --details
         - name: Pull image and start container
           run: |
-            INSTANCE_ID=i-0e38b3458f8db6da4
 
             CMD_ID=$(aws ssm send-command \
               --targets "Key=instanceIds,Values=$INSTANCE_ID" \
