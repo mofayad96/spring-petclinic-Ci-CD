@@ -24,7 +24,6 @@ jobs:
         - name: Run command on EC2
           run: |
             aws ssm send-command \
-            --targets "Key=instanceIds,Values=i-07568d2206758600b" \
+            --targets "key=instanceIds,values=i-07568d2206758600b" \
             --document-name "AWS-RunShellScript" \
-            --comment "Test command from GitHub Actions" \
-            --parameters 'commands=["echo Hello from GitHub Actions > /home/ubuntu/gha-ssm.txt"]'
+            --parameters 'commands=["ps"]'
