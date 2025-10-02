@@ -24,7 +24,7 @@ jobs:
         - name: download docker on EC2
           run: |
             aws ssm send-command \
-              --targets "Key=instanceIds,Values=i-07568d2206758600b" \
+              --targets "Key=instanceIds,Values=i-0379a48940c4be135" \
               --document-name "AWS-RunShellScript" \
               --parameters 'commands=[
                 "sudo apt-get update -y",
@@ -40,7 +40,7 @@ jobs:
         - name: pull image from docker hub , start container 
           run: |
             aws ssm send-command \
-            --targets "Key=instanceIds,Values=i-07568d2206758600b" \
+            --targets "Key=instanceIds,Values=i-0379a48940c4be135" \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
             "sudo docker container run -d --name web -p 8080:8080 deaddeal96/spring-petclinic-githubactions:latest"

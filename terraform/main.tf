@@ -22,12 +22,19 @@ data "aws_vpc" "default" {
 # Security Group (open HTTP only, no SSH needed)
 resource "aws_security_group" "app-securityGroup" {
   name        = "app-securityGroup"
-  description = "Allow HTTP only"
+  description = "Allow HTTP and app access"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -39,6 +46,7 @@ resource "aws_security_group" "app-securityGroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
 
 # IAM Role for EC2
 resource "aws_iam_role" "ec2_role" {

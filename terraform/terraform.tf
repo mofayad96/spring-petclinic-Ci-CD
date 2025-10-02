@@ -7,7 +7,7 @@ required_providers {
     }
 }
 backend "s3" {
-    bucket         = "petclinic-deploy-613307cd"
+    bucket         = "petclinic-terraform-state-mofayad96"
     key            = "terraform/state.tfstate"
     region         = "eu-central-1"
     encrypt        = true
