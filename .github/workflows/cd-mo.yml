@@ -26,4 +26,4 @@ jobs:
             aws ssm send-command \
             --targets "Key=instanceIds,Values=i-07568d2206758600b" \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["ps"]'
+            --parameters 'commands=["apt-get install nginx "]'
