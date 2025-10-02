@@ -7,18 +7,38 @@ on:
         required: true
         default: "staging"
 jobs:
-  terraform:
+  deploying app on EC2 instance:
     runs-on: ubuntu-latest
 
     steps:
         - name: checkout repository
           uses: actions/checkout@v4
+        - name: terraform 
+          uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1    
+        
+        - name: terraform init
+          working-directory: terraform
+          run : terraform init
+        - name: terraform plan 
+          working-directory: terraform
+          run : terraform plan
+          env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        - name: terraform apply
+          working-directory: terraform
+          apply: terraform apply --auto-approve
+          env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            
         - name: aws credntials
           uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
           with:
             aws-region: eu-central-1
             aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET }}          
+            aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET }}
+
         - name: Get EC2 instance ID
           id: get_instance
           run: |
@@ -28,12 +48,8 @@ jobs:
               --output text)
             echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
 
-          
         - name: download docker on EC2
           run: |
-              
-
-              # Send the command
               CMD_ID=$(aws ssm send-command \
                 --targets "Key=instanceIds,Values=$INSTANCE_ID" \
                 --document-name "AWS-RunShellScript" \
