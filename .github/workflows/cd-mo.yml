@@ -7,7 +7,7 @@ on:
         required: true
         default: "staging"
 jobs:
-  deploying app on EC2 instance:
+  deploying_app_on_EC2_instance:
     runs-on: ubuntu-latest
 
     steps:
