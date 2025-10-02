@@ -39,8 +39,8 @@ jobs:
           uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
           with:
             aws-region: eu-central-1
-            aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET }}
+            aws-access-key-id: ${{ ssecrets.AWS_ACCESS_KEY_I }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
         - name: Get EC2 instance ID
           id: get_instance
