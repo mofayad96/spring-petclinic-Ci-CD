@@ -13,7 +13,7 @@ jobs:
     steps:
         - name: checkout repository
           uses: actions/checkout@v4
-          
+
         - name: aws credntials
           uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
           with:
@@ -21,3 +21,10 @@ jobs:
             aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ID }}
             aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET }}
           
+        - name: Run command on EC2
+          run: |
+            aws ssm send-command \
+            --targets "Key=instanceIds,Values=i-07568d2206758600b" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Test command from GitHub Actions" \
+            --parameters 'commands=["echo Hello from GitHub Actions > /home/ubuntu/gha-ssm.txt"]'
