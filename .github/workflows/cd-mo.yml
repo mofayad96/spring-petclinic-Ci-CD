@@ -23,22 +23,18 @@ jobs:
           
         - name: download docker on EC2
           run: |
-            CMD_ID=$(aws ssm send-command \
+            aws ssm send-command \
               --targets "Key=instanceIds,Values=i-07568d2206758600b" \
               --document-name "AWS-RunShellScript" \
-              --query "Command.CommandId" \
-              --output text \
               --parameters 'commands=[
                 "sudo apt-get update -y",
                 "sudo apt-get install -y ca-certificates curl gnupg",
                 "sudo install -m 0755 -d /etc/apt/keyrings",
                 "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
-                "echo \\"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+                "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
                 "sudo apt-get update -y",
                 "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
                 "sudo systemctl enable docker",
                 "sudo systemctl start docker"
-              ]')
-            aws ssm list-command-invocations \
-              --command-id "$CMD_ID" \
-              --details
+              ]'
+
