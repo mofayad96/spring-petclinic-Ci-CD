@@ -23,7 +23,7 @@ jobs:
           
         - name: download docker on EC2
           run: |
-              INSTANCE_ID=i-0379a48940c4be135
+              INSTANCE_ID=i-0e38b3458f8db6da4
 
               # Send the command
               CMD_ID=$(aws ssm send-command \
@@ -54,7 +54,7 @@ jobs:
                 --details
         - name: Pull image and start container
           run: |
-            INSTANCE_ID=i-0379a48940c4be135
+            INSTANCE_ID=i-0e38b3458f8db6da4
 
             CMD_ID=$(aws ssm send-command \
               --targets "Key=instanceIds,Values=$INSTANCE_ID" \
