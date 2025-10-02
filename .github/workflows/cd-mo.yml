@@ -34,8 +34,12 @@ jobs:
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
         - name: Get EC2 instance ID
-          id: ec2
-          run: echo "INSTANCE_ID=$(terraform output -raw app_instance_id)" >> $GITHUB_ENV
+          id: get_instance
+          working-directory: terraform
+          run: |
+            INSTANCE_ID=$(terraform output -raw app_instance_id || echo "none")
+            echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+
         - name: Use instance ID
           run: echo "Deploying to instance $INSTANCE_ID"
         - name: aws credntials
