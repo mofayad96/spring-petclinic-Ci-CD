@@ -103,11 +103,11 @@ jobs:
               --query "Reservations[0].Instances[0].PublicIpAddress" --output text)" >> $GITHUB_ENV
 
         - name: Notify Slack
-                  uses: slackapi/slack-github-action@v1.27.0
-                  with:
-                    payload: |
+          uses: slackapi/slack-github-action@v1.27.0
+          with:
+            payload: |
                       {
-                        "text": " Your app now works on ip ${{ PUBLIC_IP }} "
+                        "text": " Your app now works on ip ${{ env.PUBLIC_IP }} "
                       }
-                  env:
-                    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          env:
+              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
