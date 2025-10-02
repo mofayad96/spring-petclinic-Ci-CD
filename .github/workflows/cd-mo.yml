@@ -41,7 +41,7 @@ jobs:
           run: |
             aws ssm send-command \
             --targets "Key=instanceIds,Values=i-07568d2206758600b" \
-            --document-name "AWS-RunShellScript"
+            --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
             "sudo docker container run -d --name web -p 8080:8080 deaddeal96/spring-petclinic-githubactions:latest"
             ]'
