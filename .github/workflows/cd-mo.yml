@@ -46,7 +46,7 @@ jobs:
           id: get_instance
           run: |
             INSTANCE_ID=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=Spring-petclinic_app" "Name=instance-state-name,Values=running" \
+              --filters "Name=tag:Name,Values=Spring-petclinic_app" \
               --query "Reservations[*].Instances[*].InstanceId" \
               --output text)
             echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
