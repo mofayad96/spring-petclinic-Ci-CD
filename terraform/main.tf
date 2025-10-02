@@ -1,6 +1,5 @@
 provider "aws" {
   region  = "eu-central-1" 
-  profile = "themoosalah"
 }
 
 # Use latest Ubuntu AMI
