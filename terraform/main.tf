@@ -1,12 +1,11 @@
 provider "aws" {
   region  = "eu-central-1" 
-  
 }
 
 # Use latest Ubuntu AMI
 data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["099720109477"] # Canonical
+  owners      = ["099720109477"] 
 
   filter {
     name   = "name"
@@ -19,18 +18,11 @@ data "aws_vpc" "default" {
   default = true
 }
 
-# Security Group (open HTTP only, no SSH needed)
+# Security Group open http , no ssh
 resource "aws_security_group" "app-securityGroup" {
   name        = "app-securityGroup"
   description = "Allow HTTP and app access"
   vpc_id      = data.aws_vpc.default.id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   ingress {
     from_port   = 8080
@@ -46,7 +38,6 @@ resource "aws_security_group" "app-securityGroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 
 # IAM Role for EC2
 resource "aws_iam_role" "ec2_role" {
@@ -66,15 +57,10 @@ resource "aws_iam_role" "ec2_role" {
   })
 }
 
-# Attach policies to allow SSM + S3 read
+# Only attach SSM policy (S3 removed)
 resource "aws_iam_role_policy_attachment" "ssm" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_role_policy_attachment" "s3" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
 
 # Instance Profile
@@ -93,16 +79,6 @@ resource "aws_instance" "app_server" {
   tags = {
     Name = "Spring-petclinic_app"
   }
-}
-
-# S3 Bucket for artifacts
-resource "aws_s3_bucket" "deploy_bucket" {
-  bucket = "petclinic-deploy-${random_id.bucket_suffix.hex}"
-  force_destroy = true
-}
-
-resource "random_id" "bucket_suffix" {
-  byte_length = 4
 }
 
 output "app_instance_id" {
