@@ -50,7 +50,14 @@ jobs:
               --query "Reservations[0].Instances[0].InstanceId" \
               --output text)
             echo "INSTANCE_ID=${INSTANCE_ID}" | tr -d '\n' >> $GITHUB_ENV
-
+        - name: testing ssm
+          run: | 
+            aws ssm send-command
+            --targets "Key=instances.InstanceId, Values=$INSTANCE_ID"
+            --document-name "AWS-RunShellScript"
+            -- parameters 'commands=[
+            echo "hello from  EC2 "
+            ]'
 
         - name: download docker on EC2
           run: |
