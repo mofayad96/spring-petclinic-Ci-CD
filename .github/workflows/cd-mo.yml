@@ -56,10 +56,15 @@ jobs:
           with:
             payload: |
                       {
-                        "text": " Your instance now works AND IT'S ID IS $INSTANCE_ID "
+                        "text": " Your instance now works AND IT'S ID IS ${{ env.INSTANCE_ID }} "
                       }
           env:
               SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        - name: Wait for 1 minute
+          run: |
+                echo "Waiting for 1 minute to ensure instance is fully ready..."
+                sleep 60
+                echo "Wait completed"
 
         - name: download docker on EC2
           run: |
