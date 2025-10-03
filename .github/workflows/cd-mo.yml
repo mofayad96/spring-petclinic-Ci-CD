@@ -50,14 +50,16 @@ jobs:
               --query "Reservations[0].Instances[0].InstanceId" \
               --output text)
             echo "INSTANCE_ID=${INSTANCE_ID}" | tr -d '\n' >> $GITHUB_ENV
-        - name: testing ssm
-          run: | 
-            aws ssm send-command
-            --targets "Key=instances.InstanceId, Values=$INSTANCE_ID"
-            --document-name "AWS-RunShellScript"
-            -- parameters 'commands=[
-            echo "hello from  EC2 "
-            ]'
+        
+        - name: Notify Slack
+          uses: slackapi/slack-github-action@v1.27.0
+          with:
+            payload: |
+                      {
+                        "text": " Your instance now works AND IT'S ID IS $INSTANCE_ID "
+                      }
+          env:
+              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
         - name: download docker on EC2
           run: |
