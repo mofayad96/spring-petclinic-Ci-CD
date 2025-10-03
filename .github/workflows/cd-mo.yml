@@ -56,7 +56,7 @@ jobs:
           with:
             payload: |
                       {
-                        "text": " Your instance now works AND IT'S ID IS ${{ env.INSTANCE_ID }} "
+                        "text": " Your instance now works and it's id is ${{ env.INSTANCE_ID }} "
                       }
           env:
               SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
