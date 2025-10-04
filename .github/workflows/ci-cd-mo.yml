@@ -1,4 +1,4 @@
-name: ci of springpetclinic
+name: ci cd of springpetclinic
 on:
   workflow_dispatch: 
     inputs:
