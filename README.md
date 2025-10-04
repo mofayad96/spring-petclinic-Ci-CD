@@ -18,8 +18,11 @@ This repository contains a CI/CD pipeline for the Spring Petclinic application. 
 
 ## Tech Stack
 
-- CI/CD: Jenkins
+- CI/CD: Jenkins, Github Actions
+- 
 - Containerization: Docker
+- Infrastructure as Code (IaC): Terraform
+- Cloud Platform: AWS
 - Code Quality: SonarQube
 - Security: Trivy
 - Monitoring: Prometheus & Grafana
