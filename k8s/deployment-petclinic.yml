@@ -20,8 +20,15 @@ spec:
         imagePullPolicy: IfNotPresent   
         ports:
         - containerPort: 8080
-
-#service to access app
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service:3306/petclinic"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "petclinic"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "petclinic"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "mysql"
 ---
 apiVersion: v1
 kind: Service
@@ -33,6 +40,6 @@ spec:
     app: petclinic
   ports:
     - protocol: TCP
-      port: 80 # internal port
-      targetPort: 8080 # app port
-      nodePort: 30100 #external port
+      port: 80 #internal port
+      targetPort: 8080 #app port
+      nodePort: 30100 #exteranl port
