@@ -5,7 +5,7 @@ metadata:
   labels:
     app: petclinic
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: petclinic
@@ -25,11 +25,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: webapp-service
+  name: petclinic-service
 spec:
   type: NodePort
   selector:
-    app: webapp
+    app: petclinic
   ports:
     - protocol: TCP
       port: 80 # internal port
