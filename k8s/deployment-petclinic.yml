@@ -22,6 +22,7 @@ spec:
         - containerPort: 8080
 
 #service to access app
+---
 apiVersion: v1
 kind: Service
 metadata:
