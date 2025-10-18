@@ -21,6 +21,9 @@ spec:
         ports:
         - containerPort: 8080
         env:
+        env:
+        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+          value: com.mysql.cj.jdbc.Driver
         - name: SPRING_DATASOURCE_URL
           value: "jdbc:mysql://mysql-service:3306/petclinic"
         - name: SPRING_DATASOURCE_USERNAME
