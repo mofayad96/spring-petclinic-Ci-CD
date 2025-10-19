@@ -18,13 +18,15 @@ jobs:
           with:
             java-version: 17
             distribution: temurin
-        - name: Cache Maven dependencies
-          uses: actions/cache@v3
+        - name: Cache Maven packages
+          uses: actions/cache@v4
           with:
             path: ~/.m2/repository
             key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
             restore-keys: |
               ${{ runner.os }}-maven-
+            
+            
         - name: build code using maven and skipping tests
           run:  mvn clean install -DskipTests    
         - name: SonarQube Static Code Analysis
