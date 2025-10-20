@@ -26,24 +26,16 @@ services:
     networks:
       - services
 
-  nexus:
-    image: sonatype/nexus3 
-    ports:
-      - "8081:8081" # for nexus UI
-      - "8082:8082" # for nexus communication port
-    volumes:
-      - nexus_data:/nexus-data
-    networks:
-      - services
+  # nexus:
+  #   image: sonatype/nexus3 
+  #   ports:
+  #     - "8081:8081" # for nexus UI
+  #     - "8082:8082" # for nexus communication port
+  #   volumes:
+  #     - nexus_data:/nexus-data
+  #   networks:
+  #     - services
 
-  promethues:
-    image: prom/prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-    networks:
-      - services 
 
   jenkins:
     build:
@@ -82,13 +74,21 @@ services:
     networks:
       - services
 
-  grafana :
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
-    networks:
-      - services
+  # grafana :
+  #   image: grafana/grafana
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - services
   
+  # promethues:
+  #   image: prom/prometheus
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     - services 
 
 volumes:
   sonardb_data1:
