@@ -30,7 +30,7 @@ pipeline {
         stage('Building App Docker Image') {
             steps {
                 //USING MULTISTAGE DOCKER FILE
-                sh "docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} -f Dockerfile.multi ."
+                sh "docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} -f Dockerfile.multistage ."
             }
         }
 
