@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Pulling Code from GitHub') {
             steps {
-                git branch: 'main', url: 'https://github.com/mofayad96/CI-CD-spring-petclinic.git'
+                git branch: 'main', url: 'https://github.com/mofayad96/spring-petclinic-Ci-CD.git'
                 script {
                     // Get short Git commit hash dynamically
                     env.IMAGE_TAG = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
