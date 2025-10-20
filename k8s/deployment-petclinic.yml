@@ -38,11 +38,9 @@ kind: Service
 metadata:
   name: petclinic-service
 spec:
-  type: NodePort
   selector:
     app: petclinic
   ports:
     - protocol: TCP
-      port: 80 #internal port
-      targetPort: 8080 #app port
-      nodePort: 30100 #exteranl port
+      port: 80
+      targetPort: 8080
