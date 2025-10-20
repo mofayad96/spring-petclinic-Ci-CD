@@ -41,8 +41,8 @@ cd spring-petclinic-ci-cd
 Run Docker Compose for the Application
 docker-compose -f docker-compose-petclinic.yml up -d
 
-Run Docker Compose for the CI/CD Stack
-docker-compose -f docker-compose-ci.yml up -d
+Run Docker Compose for the CI/CD jenkins
+docker-compose -f docker-compose-jenkins-services.yml up -d
 
 Jenkins Pipeline
 
