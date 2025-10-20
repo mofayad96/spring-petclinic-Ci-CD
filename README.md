@@ -59,7 +59,8 @@ Build Docker image
 Scan image with Trivy
 
 Push Docker image to Docker Hub
-<img width="1375" height="288" alt="Screenshot 2025-09-16 143016" src="https://github.com/user-attachments/assets/f8e9b0ff-d466-49a0-bdec-ed111e8238ff" />
+
+<img width="961" height="655" alt="DOCKER-HUB-jenkinspipeline" src="https://github.com/user-attachments/assets/90168fa1-4ee2-4747-993a-89913b3291b1" />
 
 
 Slack notifications for build status
