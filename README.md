@@ -19,7 +19,7 @@ This repository contains a CI/CD pipeline for the Spring Petclinic application. 
 ## Tech Stack
 
 - CI/CD: Jenkins, Github Actions
-- 
+- container orchestration: Kubernetes
 - Containerization: Docker
 - Infrastructure as Code (IaC): Terraform
 - Cloud Platform: AWS
@@ -51,14 +51,20 @@ The Jenkins pipeline includes the following stages:
 Pull code from GitHub
 
 SonarQube static code analysis
+<img width="1366" height="288" alt="Screenshot 2025-09-16 142712" src="https://github.com/user-attachments/assets/895af451-3adf-414e-b00b-2ec5f4061ff3" />
+
 
 Build Docker image
 
 Scan image with Trivy
 
 Push Docker image to Docker Hub
+<img width="1375" height="288" alt="Screenshot 2025-09-16 143016" src="https://github.com/user-attachments/assets/f8e9b0ff-d466-49a0-bdec-ed111e8238ff" />
+
 
 Slack notifications for build status
+<img width="1375" height="288" alt="Screenshot 2025-09-16 143016" src="https://github.com/user-attachments/assets/0013c3b7-cc9b-4c52-b633-d5ce4931b9fb" />
+
 
 Environment Variables
 
