@@ -51,7 +51,8 @@ The Jenkins pipeline includes the following stages:
 Pull code from GitHub
 
 SonarQube static code analysis
-<img width="1366" height="288" alt="Screenshot 2025-09-16 142712" src="https://github.com/user-attachments/assets/895af451-3adf-414e-b00b-2ec5f4061ff3" />
+<img width="1899" height="904" alt="image" src="https://github.com/user-attachments/assets/f068a3ae-3f5b-47be-a3dd-02ae4da2906d" />
+
 
 
 Build Docker image
