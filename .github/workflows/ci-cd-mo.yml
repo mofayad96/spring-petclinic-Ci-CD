@@ -58,7 +58,7 @@ jobs:
         - name: Scan published Docker image
           uses: aquasecurity/trivy-action@master
           with:
-            image-ref: 'deaddeal96/ticket-hub-back:latest'
+            image-ref: 'deaddeal96/spring-petclinic-githubactions:latest'
             format: 'table'
             severity: 'CRITICAL'
             exit-code: '1'
