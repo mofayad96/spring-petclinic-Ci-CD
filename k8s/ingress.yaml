@@ -5,7 +5,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  ingressClassName: ingress-nginx-controller  # controller name
+  ingressClassName: nginx  # controller name
   rules:
   - host: petclinic.app   #  host name 
     http:
