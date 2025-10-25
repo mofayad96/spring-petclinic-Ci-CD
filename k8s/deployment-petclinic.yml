@@ -21,7 +21,6 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        env:
         - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
           value: com.mysql.cj.jdbc.Driver
         - name: SPRING_DATASOURCE_URL
