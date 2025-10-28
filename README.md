@@ -1,3 +1,4 @@
+
 # Spring Petclinic CI/CD
 
 This repository contains a CI/CD pipeline for the Spring Petclinic application. It integrates Jenkins, Docker, SonarQube, Trivy, Prometheus, and Grafana to automate building, testing, scanning, and deployment.
@@ -31,57 +32,50 @@ This repository contains a CI/CD pipeline for the Spring Petclinic application. 
 
 ---
 
-## Setup
-
-### Clone the repository
-
-git clone https://github.com/mofayad96/spring-petclinic-ci-cd.git
-cd spring-petclinic-ci-cd
-
-Run Docker Compose for the Application
-docker-compose -f docker-compose-petclinic.yml up -d
-
-Run Docker Compose for the CI/CD jenkins
-docker-compose -f docker-compose-jenkins-services.yml up -d
-
-Jenkins Pipeline
-
-The Jenkins pipeline includes the following stages:
-
-Pull code from GitHub
-
-SonarQube static code analysis
-<img width="870" height="166" alt="image" src="https://github.com/user-attachments/assets/15d3cda2-5903-4fe3-b39e-c649dd73941a" />
+Craeting The VPC Steps
 
 
 
+1: Create the VPC
 
-Build Docker image
+themoosalah@themoosalah-device:~$ aws ec2 create-vpc --cidr-block 10.0.0.0/16
 
-Scan image with Trivy
+Step 2: Enable DNS Support and Hostnames
 
-Push Docker image to Docker Hub
+themoosalah@themoosalah-device:~$ aws ec2 modify-vpc-attribute --vpc-id vpc-0f6ef4508bcc5849b --enable-dns-support "{\"Value\":true}"
+  
 
-<img width="961" height="655" alt="DOCKER-HUB-jenkinspipeline" src="https://github.com/user-attachments/assets/90168fa1-4ee2-4747-993a-89913b3291b1" />
+themoosalah@themoosalah-device:~$ aws ec2 modify-vpc-attribute --vpc-id vpc-0f6ef4508bcc5849b --enable-dns-hostnames "{\"Value\":true}"
+
+Step 3: Create and Attach an Internet Gateway
+
+themoosalah@themoosalah-device:~$ aws ec2 create-internet-gateway
 
 
-Slack notifications for build status
-<img width="1375" height="288" alt="Screenshot 2025-09-16 143016" src="https://github.com/user-attachments/assets/0013c3b7-cc9b-4c52-b633-d5ce4931b9fb" />
+Step 4: Create a Public Subnet
+
+themoosalah@themoosalah-device:~$ aws ec2 create-subnet --vpc-id vpc-0f6ef4508bcc5849b --cidr-block 10.0.1.0/24 --availability-zone eu-central-1a
+
+Step 5: Create a Public Route Table and Route to Internet Gateway
+
+aws ec2 create-route-table --vpc-id vpc-0f6ef4508bcc5849b
+
+aws ec2 create-route --route-table-id rtb-00bfc75e3174d7c2a --destination-cidr-block 0.0.0.0/0 --gateway-id igw-05bbdadba377cdfd6
+
+aws ec2 associate-route-table --subnet-id subnet-0336eade49f6e9092 --route-table-id rtb-00bfc75e3174d7c2a
 
 
-Environment Variables
+Step 6: Tag the VPC
 
-IMAGE_NAME – Docker image name (default: spring-petclinic-app)
+themoosalah@themoosalah-device:~$ aws ec2 create-tags --resources vpc-0f6ef4508bcc5849b --tags Key=Name,Value=petclinic_vpc
 
-IMAGE_TAG – Docker image tag (auto-set from Git commit)
+Step 7: Create a Private Subnet
 
-SONARQUBE – Jenkins SonarQube server name
+themoosalah@themoosalah-device:~$ aws ec2 create-subnet --vpc-id vpc-0f6ef4508bcc5849b --cidr-block 10.0.2.0/24 --availability-zone eu-central-1b --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=Private-Subnet}]'
 
-SLACK_TOKEN – Jenkins Slack bot token
+Step 8: Create a Private Route Table
 
-Monitoring
+themoosalah@themoosalah-device:~$ aws ec2 create-route-table --vpc-id vpc-0f6ef4508bcc5849b --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=Private-RT}]'
 
-Prometheus: http://localhost:9090
 
-Grafana: http://localhost:3000
- (default credentials: admin/admin)
+themoosalah@themoosalah-device:~$ aws ec2 associate-route-table --subnet-id subnet-0a6163c98fa5d7370 --route-table-id rtb-0e0ac056432cc3006
