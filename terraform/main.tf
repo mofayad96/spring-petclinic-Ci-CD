@@ -10,7 +10,7 @@ terraform {
 
 provider "aws" {
   region  = "eu-central-1"
-  profile = "themoosalah"
+  
 }
 
 # 🔹 Get latest Ubuntu AMI
