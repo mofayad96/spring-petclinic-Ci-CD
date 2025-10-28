@@ -5,16 +5,15 @@ terraform {
       version = "~> 6.0"
     }
   }
-
   required_version = ">= 1.2"
 }
 
 provider "aws" {
-  region = "eu-central-1"
+  region  = "eu-central-1"
   profile = "themoosalah"
 }
 
-
+# 🔹 Get latest Ubuntu AMI
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"]
@@ -25,15 +24,29 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-data "aws_vpc" "default" {
-  default = true
+# 🔹 Use your manually created VPC
+data "aws_vpc" "custom" {
+  id = "vpc-0f6ef4508bcc5849b"
 }
 
-# Security group
+# 🔹 Use your existing public subnet (update CIDR if different)
+data "aws_subnet" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.custom.id]
+  }
+
+  filter {
+    name   = "cidr-block"
+    values = ["10.0.1.0/24"]
+  }
+}
+
+# 🔹 Security Group for the App
 resource "aws_security_group" "app_sg" {
   name        = "app-securityGroup"
   description = "Allow HTTP access on 8080"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = data.aws_vpc.custom.id
 
   ingress {
     from_port   = 8080
@@ -50,7 +63,7 @@ resource "aws_security_group" "app_sg" {
   }
 }
 
-#IAM Role 
+# 🔹 IAM Role for EC2
 resource "aws_iam_role" "ec2_role" {
   name = "ec2-ssm-role"
 
@@ -71,12 +84,12 @@ resource "aws_iam_role_policy_attachment" "ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# S3 Bucket for Artifacts
+# 🔹 S3 Bucket for artifacts
 resource "aws_s3_bucket" "artifact_bucket" {
   bucket = "spring-petclinic-artifacts-mofayad96"
 
   tags = {
-    Name        = "spring-petclinic-artifacts"
+    Name = "spring-petclinic-artifacts"
   }
 }
 
@@ -105,7 +118,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "artifact_lifecycle" {
   }
 }
 
-# --- Give EC2 S3 read access ---
+# 🔹 IAM Policy for EC2 to access S3
 resource "aws_iam_role_policy" "s3_access" {
   name = "ec2-s3-access-policy"
   role = aws_iam_role.ec2_role.id
@@ -125,20 +138,24 @@ resource "aws_iam_role_policy" "s3_access" {
   })
 }
 
-#  Instance Profile 
+# 🔹 IAM Instance Profile
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "ec2-ssm-instance-profile"
   role = aws_iam_role.ec2_role.name
 }
 
-#  EC2 Instance
+# 🔹 EC2 Instance (Spring Petclinic)
 resource "aws_instance" "app_server" {
-  ami                  = data.aws_ami.ubuntu.id
-  instance_type        = "t2.micro"
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = "t2.micro"
+  subnet_id              = data.aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
-  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+  associate_public_ip_address = true
 
   tags = {
     Name = "Spring-petclinic_app"
   }
 }
+
+
