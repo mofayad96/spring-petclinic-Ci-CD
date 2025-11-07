@@ -10,10 +10,9 @@ terraform {
 
 provider "aws" {
   region  = "eu-central-1"
-  
 }
 
-# 🔹 Get latest Ubuntu AMI
+
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"]
@@ -24,12 +23,12 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# 🔹 Use your manually created VPC
+
 data "aws_vpc" "custom" {
   id = "vpc-0f6ef4508bcc5849b"
 }
 
-# 🔹 Use your existing public subnet (update CIDR if different)
+
 data "aws_subnet" "public" {
   filter {
     name   = "vpc-id"
@@ -42,7 +41,6 @@ data "aws_subnet" "public" {
   }
 }
 
-# 🔹 Security Group for the App
 resource "aws_security_group" "app_sg" {
   name        = "app-securityGroup"
   description = "Allow HTTP access on 8080"
@@ -63,7 +61,7 @@ resource "aws_security_group" "app_sg" {
   }
 }
 
-# 🔹 IAM Role for EC2
+
 resource "aws_iam_role" "ec2_role" {
   name = "ec2-ssm-role"
 
@@ -84,7 +82,7 @@ resource "aws_iam_role_policy_attachment" "ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# 🔹 S3 Bucket for artifacts
+
 resource "aws_s3_bucket" "artifact_bucket" {
   bucket = "spring-petclinic-artifacts-mofayad96"
 
@@ -118,7 +116,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "artifact_lifecycle" {
   }
 }
 
-# 🔹 IAM Policy for EC2 to access S3
+
 resource "aws_iam_role_policy" "s3_access" {
   name = "ec2-s3-access-policy"
   role = aws_iam_role.ec2_role.id
@@ -138,13 +136,11 @@ resource "aws_iam_role_policy" "s3_access" {
   })
 }
 
-# 🔹 IAM Instance Profile
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "ec2-ssm-instance-profile"
   role = aws_iam_role.ec2_role.name
 }
 
-# 🔹 EC2 Instance (Spring Petclinic)
 resource "aws_instance" "app_server" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
