@@ -33,6 +33,4 @@ jobs:
           echo "SLACK_WEBHOOK_URL is available"
           echo "SONAR_TOKEN is available"
 
-      - name: Example: Use AWS CLI
-        run: |
-          aws sts get-caller-identity
+      
