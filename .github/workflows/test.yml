@@ -1,0 +1,38 @@
+name: Use All Secrets
+
+on:
+  workflow_dispatch:  # Run manually
+  push:
+    branches:
+      - main
+
+jobs:
+  secrets-job:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_GITHUB_ACTIONS_ID: ${{ secrets.AWS_GITHUB_ACTIONS_ID }}
+      AWS_GITHUB_ACTIONS_SECRET: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Show Secrets Available
+        run: |
+          echo "AWS_ACCESS_KEY_ID is available"
+          echo "AWS_SECRET_ACCESS_KEY is available"
+          echo "AWS_GITHUB_ACTIONS_ID is available"
+          echo "AWS_GITHUB_ACTIONS_SECRET is available"
+          echo "DOCKER_USERNAME is available"
+          echo "DOCKER_PASS is available"
+          echo "SLACK_WEBHOOK_URL is available"
+          echo "SONAR_TOKEN is available"
+
+      - name: Example: Use AWS CLI
+        run: |
+          aws sts get-caller-identity
