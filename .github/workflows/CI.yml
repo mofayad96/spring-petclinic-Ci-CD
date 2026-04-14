@@ -3,12 +3,10 @@ permissions:
   contents: read
 name: ci workflow of springpetclinic
 on:
-  workflow_dispatch: 
-    inputs:
-      environment:
-        description: "choose environment"
-        required: true
-        default: "staging"
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 jobs:
     spring-petclinic-CI-CD:
       runs-on: ubuntu-latest
@@ -72,7 +70,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: trivy-report-petclinic
-            path: '${{ github.workspace }}/trivy-report-petclinic.txt'
+            path: '${{ github.workspace }}/trivy-report.txt'
 
         - name: Build and push to ECR (cached build)
           uses: docker/build-push-action@v6
