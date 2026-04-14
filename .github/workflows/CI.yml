@@ -1,0 +1,93 @@
+name: ci workflow of springpetclinic
+on:
+  workflow_dispatch: 
+    inputs:
+      environment:
+        description: "choose environment"
+        required: true
+        default: "staging"
+jobs:
+    spring-petclinic-CI-CD:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: checkout code
+          uses: actions/checkout@v5.0.0
+        - name: setup java jdk
+          uses: actions/setup-java@v5.0.0
+          with:
+            java-version: 17
+            distribution: temurin
+        - name: Cache Maven packages
+          uses: actions/cache@v4
+          with:
+            path: ~/.m2/repository
+            key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+            restore-keys: |
+              ${{ runner.os }}-maven-
+            
+            
+        - name: build code using maven and skipping tests
+          run:  mvn clean install -DskipTests    
+        - name: SonarQube Static Code Analysis
+          run: |
+            mvn clean install sonar:sonar -DskipTests \
+              -Dsonar.projectKey=mofayad96_spring-petclinic \
+              -Dsonar.organization=mofayad96 \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        
+        - name: Docker Setup Buildx 
+          uses: docker/setup-buildx-action@v3.11.1
+
+        - name: Configure AWS credentials (OIDC)
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: arn:aws:iam::184574354202:role/GitHubActionsECRRole
+            aws-region: eu-central-1
+
+        - name: Login to Amazon ECR
+          uses: aws-actions/amazon-ecr-login@v2
+        
+        - name: Build image
+          uses: docker/build-push-action@v6
+          with:
+            context: .
+            file: ./Dockerfile.multistage
+            push: false
+            tags: springpetclinic:${{ github.sha }}
+        - name: Scan Docker image (Trivy)
+          uses: aquasecurity/trivy-action@master
+          with:
+            image-ref: springpetclinic:${{ github.sha }}
+            format: table
+            severity: CRITICAL
+            exit-code: 1
+            output: trivy-report.txt
+
+        - name: Upload Trivy report
+          uses: actions/upload-artifact@v4
+          with:
+            name: trivy-report-petclinic
+            path: '${{ github.workspace }}/trivy-report-petclinic.txt'
+
+        - name: Build and push to ECR
+          uses: docker/build-push-action@v6
+          with:
+            context: .
+            file: ./Dockerfile.multistage
+            push: true
+            tags: |
+              184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic:${{ github.sha }}
+
+        - name: Notify Slack
+          uses: slackapi/slack-github-action@v1.27.0
+          with:
+            payload: |
+              {
+                "text": " Build finished for *${{ github.repository }}* on branch *${{ github.ref_name }}* \nStatus: ${{ job.status }}"
+              }
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        
+            

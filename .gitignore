@@ -77,3 +77,6 @@ terraform.rc
 # Lock file (optional: keep if you want reproducible provider versions)
 .terraform.lock.hcl
 .terraform/.terraform
+
+.README.md
+.RECOMMENDED.md

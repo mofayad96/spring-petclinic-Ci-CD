@@ -1,7 +1,7 @@
 
 # Spring Petclinic CI/CD
 
-This repository contains a CI/CD pipeline for the Spring Petclinic application. It integrates Jenkins, Docker, SonarQube, Trivy, Prometheus, and Grafana to automate building, testing, scanning, and deployment.
+This repository contains a CI/CD pipeline for the Spring Petclinic application. It integrates GitHub Actions, Docker, SonarQube, Trivy, Prometheus, and Grafana to automate building, testing, scanning, and deployment.
 
 ---
 
@@ -11,7 +11,7 @@ This repository contains a CI/CD pipeline for the Spring Petclinic application. 
 - Static code analysis using SonarQube to ensure code quality.
 - Builds a multi-stage Docker image for optimized deployment.
 - Scans Docker images for critical vulnerabilities using Trivy.
-- CI/CD pipeline managed with Jenkins, including Docker-in-Docker support.
+- CI/CD pipeline managed with GitHub Actions.
 - Monitoring using Prometheus and Grafana.
 - Sends build status notifications to a Slack channel.
 
@@ -19,7 +19,7 @@ This repository contains a CI/CD pipeline for the Spring Petclinic application. 
 
 ## Tech Stack
 
-- CI/CD: Jenkins, Github Actions
+- CI/CD: GitHub Actions
 - container orchestration: Kubernetes
 - Containerization: Docker
 - Infrastructure as Code (IaC): Terraform
