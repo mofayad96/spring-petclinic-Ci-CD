@@ -78,5 +78,9 @@ terraform.rc
 .terraform.lock.hcl
 .terraform/.terraform
 
-.README.md
-.RECOMMENDED.md
+# Local docs excluded from repository
+README.md
+RECOMMENDED_UPDATES.md
+recommended_updates.md
+
+RECOMMENDED_UPDATES.md
