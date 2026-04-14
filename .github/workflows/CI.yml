@@ -53,7 +53,9 @@ jobs:
             file: ./Dockerfile.multistage
             push: false
             load: true
-            tags: springpetclinic:${{ github.sha }}
+            tags: |
+              springpetclinic:latest
+              springpetclinic:${{ github.sha }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
 
@@ -79,6 +81,7 @@ jobs:
               file: ./Dockerfile.multistage
               push: true
               tags: |
+                184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic:latest
                 184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic:${{ github.sha }}
               cache-from: type=gha
               cache-to: type=gha,mode=max
