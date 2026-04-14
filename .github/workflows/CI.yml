@@ -28,7 +28,7 @@ jobs:
             key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
             restore-keys: |
               ${{ runner.os }}-maven-
-            
+              
             
         - name: build code using maven and skipping tests
           run:  mvn clean install -DskipTests    
@@ -46,14 +46,17 @@ jobs:
         - name: Login to Amazon ECR
           uses: aws-actions/amazon-ecr-login@v2
         
-        - name: Build image
+        - name: Build image (with cache)
           uses: docker/build-push-action@v6
           with:
             context: .
             file: ./Dockerfile.multistage
-            load: true
             push: false
+            load: true
             tags: springpetclinic:${{ github.sha }}
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
+
         - name: Scan Docker image (Trivy)
           uses: aquasecurity/trivy-action@master
           with:
@@ -69,14 +72,17 @@ jobs:
             name: trivy-report-petclinic
             path: '${{ github.workspace }}/trivy-report-petclinic.txt'
 
-        - name: Build and push to ECR
+        - name: Build and push to ECR (cached build)
           uses: docker/build-push-action@v6
           with:
-            context: .
-            file: ./Dockerfile.multistage
-            push: true
-            tags: |
-              184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic:${{ github.sha }}
+              context: .
+              file: ./Dockerfile.multistage
+              push: true
+              tags: |
+                184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic:${{ github.sha }}
+              cache-from: type=gha
+              cache-to: type=gha,mode=max
+
 
         - name: Notify Slack
           uses: slackapi/slack-github-action@v1.27.0
