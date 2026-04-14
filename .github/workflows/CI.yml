@@ -51,6 +51,7 @@ jobs:
           with:
             context: .
             file: ./Dockerfile.multistage
+            load: true
             push: false
             tags: springpetclinic:${{ github.sha }}
         - name: Scan Docker image (Trivy)
@@ -59,7 +60,7 @@ jobs:
             image-ref: springpetclinic:${{ github.sha }}
             format: table
             severity: CRITICAL
-            exit-code: 0 # Do not fail the build on vulnerabilities
+            exit-code: 0 
             output: trivy-report.txt
 
         - name: Upload Trivy report
