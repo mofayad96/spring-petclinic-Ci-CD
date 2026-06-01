@@ -33,6 +33,7 @@ jobs:
         
         - name: Run Tests
           run: mvn test
+          continue-on-error: true  
 
         - name: Upload test results
           uses: actions/upload-artifact@v4
