@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: mysql-db
-        image: mysql:9.2
+        image: "{{ .Values.mysqlImage.repository }}:{{ .Values.mysqlImage.tag }}"
         ports:
         - containerPort: 3306
         env:
@@ -50,5 +50,5 @@ spec:
     app: mysql
   ports:
     - protocol: TCP
-      port: 3306
-      targetPort: 3306
+      port: {{ .Values.mysqlService.port }}
+      targetPort: {{ .Values.mysqlService.targetPort }}

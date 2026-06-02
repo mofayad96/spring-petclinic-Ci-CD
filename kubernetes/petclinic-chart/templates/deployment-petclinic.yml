@@ -5,7 +5,7 @@ metadata:
   labels:
     app: petclinic
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: petclinic
@@ -14,10 +14,13 @@ spec:
       labels:
         app: petclinic
     spec:
+      imagePullSecrets:
+            {{- toYaml .Values.imagePullSecrets | nindent 8 }}
       containers:
       - name: petclinic
-        image: deaddeal96/spring-petclinic-githubactions:latest 
-        imagePullPolicy: IfNotPresent   
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        
         ports:
         - containerPort: 8080
         env:
@@ -41,5 +44,5 @@ spec:
     app: petclinic
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
+      port: {{  .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}

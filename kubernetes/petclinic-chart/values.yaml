@@ -1,4 +1,4 @@
-# Default values for petclinic.
+# Default values for petclinic-chart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -7,14 +7,23 @@ replicaCount: 1
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: nginx
+  repository: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic
   # This sets the pull policy for images.
-  pullPolicy: IfNotPresent
+
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
+
+# Image settings for mysql-deployment.yaml
+mysqlImage:
+  repository: mysql
+  pullPolicy: IfNotPresent
+  tag: "8.0"
+
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-imagePullSecrets: []
+imagePullSecrets:
+ - name: ecr-secret
 # This is to override the chart name.
 nameOverride: ""
 fullnameOverride: ""
@@ -51,23 +60,33 @@ securityContext: {}
 
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  selector:
+    app: petclinic
   type: ClusterIP
-  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
-  port: 80
+  port: 8080
+  targetPort: 8080
+
+mysqlService:
+  selector:
+    app: mysql
+  type: ClusterIP
+  port: 3306
+  targetPort: 3306
+
+      
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  enabled: true
+  className: nginx
+
+  annotations:
+    kubernetes.io/ingress.class: nginx
+
   hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
+    - host: petclinic.local
+      path: /
+      pathType: Prefix
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
