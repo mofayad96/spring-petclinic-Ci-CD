@@ -6,7 +6,7 @@
 
 set -e # Exit on error
 
-# --- Configuration ---
+# --- sConfiguration ---
 REGION="eu-central-1"
 CLUSTER_NAME="springpetclinic-eks"
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
