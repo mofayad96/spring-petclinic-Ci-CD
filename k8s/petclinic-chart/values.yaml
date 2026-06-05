@@ -84,7 +84,7 @@ ingress:
     kubernetes.io/ingress.class: nginx
 
   hosts:
-    - host: petclinic.local
+    - host: ""
       path: /
       pathType: Prefix
   tls: []

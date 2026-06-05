@@ -7,15 +7,12 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-{{- range .Values.ingress.hosts }}
-    - host: {{ .host }}
-      http:
+    - http:
         paths:
-          - path: {{ .path }}
-            pathType: {{ .pathType }}
+          - path: /
+            pathType: Prefix
             backend:
               service:
                 name: petclinic-service
                 port:
                   number: 8080
-{{- end }}
