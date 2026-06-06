@@ -9,106 +9,92 @@ on:
     branches: [main]
 jobs:
   spring-petclinic-CI-CD:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: checkout code
-          uses: actions/checkout@v4
-        - name: setup java jdk
-          uses: actions/setup-java@v5.0.0
-          with:
-            java-version: 17
-            distribution: temurin
-        - name: Cache Maven packages
-          uses: actions/cache@v4
-          with:
-            path: ~/.m2/repository
-            key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-            restore-keys: |
-              ${{ runner.os }}-maven-
-             
-  Build code using mvn and run tests :
-    needs: spring-petclinic-CI-CD
-    runs-on: ubuntu-latest   
-    steps:     
-
-        - name: build code using maven and skipping tests
-          run:  mvn clean install -DskipTests    
-        
-        - name: Run Tests
-          run: mvn test
-          continue-on-error: true  
-
-        - name: Upload test results
-          uses: actions/upload-artifact@v4
-          with:
-            name: test-results
-            path: target/surefire-reports/
-
-  Build Docker Image :
-    needs: Build code using mvn ,run tests
-    runs-on: ubuntu-latest  
+    runs-on: ubuntu-latest
     steps:
-        - name: Docker Setup Buildx 
-          uses: docker/setup-buildx-action@v3.11.1
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: setup java jdk
+        uses: actions/setup-java@v5.0.0
+        with:
+          java-version: 17
+          distribution: temurin
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: build code using maven and run tests
+        run: |
+          mvn clean install -DskipTests
+          mvn test
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/
+        if: always()  # Upload even if tests fail
 
-        - name: Configure AWS credentials (OIDC)
-          uses: aws-actions/configure-aws-credentials@v4
-          with:
-            role-to-assume: arn:aws:iam::184574354202:role/GitHubActionsECRRole
-            aws-region: eu-central-1
+  build-docker-image:
+    needs: spring-petclinic-CI-CD
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v3.11.1
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::184574354202:role/GitHubActionsECRRole
+          aws-region: eu-central-1
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.multistage
+          push: false
+          load: true
+          tags: |
+            springpetclinic:latest
+            springpetclinic:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-        - name: Login to Amazon ECR
-          uses: aws-actions/amazon-ecr-login@v2
-        
-        - name: Build image 
-          uses: docker/build-push-action@v6
-          with:
-            context: .
-            file: ./Dockerfile.multistage
-            push: false
-            load: true
-            tags: |
-              springpetclinic:latest
-              springpetclinic:${{ github.sha }}
-            cache-from: type=gha
-            cache-to: type=gha,mode=max
-  security Scan and Push image to ECR:
-      needs: Build  Docker Image 
-      runs-on: ubuntu-latest  
-      steps:
-          - name: Scan Docker image (Trivy)
-            uses: aquasecurity/trivy-action@master
-            with:
-              image-ref: springpetclinic:${{ github.sha }}
-              format: table
-              severity: CRITICAL
-              exit-code: 0 
-              output: trivy-report.txt
-
-          - name: Upload Trivy report
-            uses: actions/upload-artifact@v4
-            with:
-              name: trivy-report-petclinic
-              path: '${{ github.workspace }}/trivy-report.txt'
-
-          - name: Tag and push to ECR
-            run: |
-                ECR=184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic
-                docker tag springpetclinic:${{ github.sha }} $ECR:${{ github.sha }}
-                docker tag springpetclinic:${{ github.sha }} $ECR:latest
-                docker push $ECR:${{ github.sha }}
-                docker push $ECR:latest
-
-          - name: Notify Slack
-            uses: slackapi/slack-github-action@v1.27.0
-            if: always()
-            with:
-              payload: |
-                {
-                  "text": " Build finished for *${{ github.repository }}* on branch *${{ github.ref_name }}* \nStatus: ${{ job.status }}"
-                }
-            env:
-              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          
-              
+  security-scan-and-push:
+    needs: build-docker-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan Docker image (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: springpetclinic:${{ github.sha }}
+          format: table
+          severity: CRITICAL
+          exit-code: 0
+          output: trivy-report.txt
+      - name: Upload Trivy report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report-petclinic
+          path: ${{ github.workspace }}/trivy-report.txt
+      - name: Tag and push to ECR
+        run: |
+          ECR=184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic
+          docker tag springpetclinic:${{ github.sha }} $ECR:${{ github.sha }}
+          docker tag springpetclinic:${{ github.sha }} $ECR:latest
+          docker push $ECR:${{ github.sha }}
+          docker push $ECR:latest
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.27.0
+        if: always()
+        with:
+          payload: |
+            {
+              "text": "Build finished for *${{ github.repository }}* on branch *${{ github.ref_name }}* \nStatus: ${{ job.status }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
