@@ -27,7 +27,7 @@ jobs:
             restore-keys: |
               ${{ runner.os }}-maven-
              
-  Build code using mvn ,run tests :
+  Build code using mvn and run tests :
     needs: spring-petclinic-CI-CD
     runs-on: ubuntu-latest   
     steps:     
