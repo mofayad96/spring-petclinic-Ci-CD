@@ -65,6 +65,12 @@ helm upgrade --install ingress-nginx ingress-nginx \
   --repo https://kubernetes.github.io/ingress-nginx \
   --namespace ingress-nginx --create-namespace
 
+echo "  - Waiting for Ingress Controller to be ready..."
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+
 # 3. Application Deployment
 echo "📦 Step 3: Deploying PetClinic Application..."
 cd k8s/petclinic-chart
