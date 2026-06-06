@@ -12,7 +12,7 @@ image:
 
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "257f1fb55ae1ba908c2529a0316f9c170ce3555a"
+  tag: "a114e3de83637f5c2cf1cf22467749323e793821"
 
 # Image settings for mysql-deployment.yaml
 mysqlImage:
