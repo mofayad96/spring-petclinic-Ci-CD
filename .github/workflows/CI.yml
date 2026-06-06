@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  build-and-test:
+  build-and-test-code:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
@@ -37,8 +37,8 @@ jobs:
           path: target/surefire-reports/
         if: always()
 
-  build-scan-push:
-    needs: build-and-test
+  build-scan-push-docker-image:
+    needs: build-and-test-code
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
