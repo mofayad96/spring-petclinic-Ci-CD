@@ -47,6 +47,20 @@ terraform init
 terraform apply -auto-approve
 cd ../..
 
+# Argo CD
+echo "  - Provisioning Argo CD and Bootstrap Application..."
+cd terraform/argocd
+cat <<EOF > terraform.tfvars
+cluster_name     = "$CLUSTER_NAME"
+region           = "$REGION"
+repo_url         = "https://github.com/mofayad96/spring-petclinic-Ci-CD.git"
+image_repository = "$ECR_URL"
+EOF
+
+terraform init
+terraform apply -auto-approve
+cd ../..
+
 # 2. Kubernetes Configuration
 echo "🎡 Step 2: Configuring Kubernetes..."
 aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
@@ -72,12 +86,12 @@ kubectl wait --namespace ingress-nginx \
   --timeout=120s
 
 # 3. Application Deployment
-echo "📦 Step 3: Deploying PetClinic Application..."
-cd k8s/petclinic-chart
-helm upgrade --install petclinic . \
-  --set image.repository=$ECR_URL \
-  --set image.tag=latest
-cd ../..
+echo "📦 Step 3: Deploying PetClinic Application (Managed by Argo CD)..."
+# cd k8s/petclinic-chart
+# helm upgrade --install petclinic . \
+#   --set image.repository=$ECR_URL \
+#   --set image.tag=latest
+# cd ../..
 
 echo "=============================================================================="
 echo "✅ Deployment Complete!"
