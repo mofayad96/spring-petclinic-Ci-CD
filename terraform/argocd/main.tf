@@ -44,8 +44,6 @@ resource "helm_release" "petclinic_bootstrap" {
             parameters:
               - name: image.repository
                 value: "${var.image_repository}"
-              - name: image.tag
-                value: "latest"
         destination:
           server: https://kubernetes.default.svc
           namespace: default
