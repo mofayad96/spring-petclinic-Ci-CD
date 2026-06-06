@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  Build-and-Test code using Maven:
+  Build-and-Test-code:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
@@ -38,7 +38,7 @@ jobs:
         if: always()  # Upload even if tests fail
 
   build-docker-image:
-    needs: Build-and-Test code using Maven
+    needs: Build-and-Test-code
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
