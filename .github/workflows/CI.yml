@@ -69,7 +69,6 @@ jobs:
     needs: build-docker-image
     runs-on: ubuntu-latest
     steps:
-      steps:
       - name: Scan Docker image (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
