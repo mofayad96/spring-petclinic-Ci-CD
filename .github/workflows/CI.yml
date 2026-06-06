@@ -40,9 +40,14 @@ jobs:
   build-scan-push-docker-image:
     needs: build-and-test-code
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write  # Required for signing with cosign
     steps:
       - name: checkout code
         uses: actions/checkout@v4
+      
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v3.11.1
       
@@ -86,12 +91,36 @@ jobs:
         if: always()
       
       - name: Tag and push to ECR
+        id: push-to-ecr
         run: |
           ECR=184574354202.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/springpetclinic
           docker tag springpetclinic:${{ github.sha }} $ECR:${{ github.sha }}
           docker tag springpetclinic:${{ github.sha }} $ECR:latest
           docker push $ECR:${{ github.sha }}
           docker push $ECR:latest
+          echo "ECR_IMAGE=$ECR:${{ github.sha }}" >> $GITHUB_OUTPUT
+      
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: 'v2.4.0'
+      
+      - name: Sign Docker image with Cosign (Keyless)
+        run: |
+          cosign sign --yes \
+            --recursive \
+            ${{ steps.push-to-ecr.outputs.ECR_IMAGE }}
+        env:
+          COSIGN_EXPERIMENTAL: true
+      
+      - name: Verify Cosign signature
+        run: |
+          cosign verify --yes \
+            ${{ steps.push-to-ecr.outputs.ECR_IMAGE }} \
+            --certificate-identity-regexp="https://github.com/${{ github.repository }}/\.github/workflows/.*" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+        env:
+          COSIGN_EXPERIMENTAL: true
       
       - name: Notify Slack
         uses: slackapi/slack-github-action@v1.27.0
