@@ -4,6 +4,8 @@ name: ci workflow of springpetclinic
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - k8s/petclinic-chart/values-dev.yaml
   pull_request:
     branches: [main]
 jobs:
@@ -74,7 +76,6 @@ jobs:
           push: false
           load: true
           tags: |
-            springpetclinic:latest
             springpetclinic:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -111,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
       packages: write
     steps:
       - name: checkout code
@@ -149,7 +150,6 @@ jobs:
           push: false
           load: true
           tags: |
-            springpetclinic:latest
             springpetclinic:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -185,9 +185,7 @@ jobs:
         run: |
           ECR=184574354202.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/springpetclinic
           docker tag springpetclinic:${{ github.sha }} $ECR:${{ github.sha }}
-          docker tag springpetclinic:${{ github.sha }} $ECR:latest
           docker push $ECR:${{ github.sha }}
-          docker push $ECR:latest
           echo "ECR_IMAGE=$ECR:${{ github.sha }}" >> $GITHUB_OUTPUT
       
       - name: Install Cosign
@@ -210,7 +208,38 @@ jobs:
             --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
         env:
           COSIGN_EXPERIMENTAL: true
-            
+
+      - name: Update dev image tag
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("k8s/petclinic-chart/values-dev.yaml")
+          tag = "${{ github.sha }}"
+          lines = path.read_text().splitlines()
+
+          for index, line in enumerate(lines):
+              if line.strip().startswith("tag:"):
+                  indent = line[:len(line) - len(line.lstrip())]
+                  lines[index] = f'{indent}tag: "{tag}"'
+                  break
+          else:
+              raise SystemExit("image tag field not found in values-dev.yaml")
+
+          path.write_text("\n".join(lines) + "\n")
+          PY
+
+          if git diff --quiet -- k8s/petclinic-chart/values-dev.yaml; then
+            echo "values-dev.yaml already points at ${{ github.sha }}"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add k8s/petclinic-chart/values-dev.yaml
+          git commit -m "chore(gitops): deploy image ${{ github.sha }}"
+          git push origin HEAD:main
+
       - name: Notify Slack
         uses: slackapi/slack-github-action@v1.27.0
         if: always()

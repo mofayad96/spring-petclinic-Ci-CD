@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spring-petclinic-dev
+  namespace: argocd
+spec:
+  project: spring-petclinic
+  source:
+    repoURL: https://github.com/mofayad96/spring-petclinic-Ci-CD.git
+    targetRevision: main
+    path: k8s/petclinic-chart
+    helm:
+      valueFiles:
+        - values-dev.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: petclinic
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
