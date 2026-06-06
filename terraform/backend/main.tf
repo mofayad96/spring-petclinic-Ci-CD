@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "tf_state" {
     }
   }
 }
-
+#s
 resource "aws_dynamodb_table" "tf_lock" {
   name         = "petclinic-tf-locks"
   billing_mode = "PAY_PER_REQUEST"
