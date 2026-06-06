@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [main]
 jobs:
-    spring-petclinic-CI-CD:
+  spring-petclinic-CI-CD:
       runs-on: ubuntu-latest
 
       steps:
@@ -26,8 +26,12 @@ jobs:
             key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
             restore-keys: |
               ${{ runner.os }}-maven-
-              
-            
+             
+  Build code using mvn ,run tests :
+    needs: spring-petclinic-CI-CD
+    runs-on: ubuntu-latest   
+    steps:     
+
         - name: build code using maven and skipping tests
           run:  mvn clean install -DskipTests    
         
@@ -41,6 +45,10 @@ jobs:
             name: test-results
             path: target/surefire-reports/
 
+Build Docker Image :
+    needs: Build code using mvn ,run tests
+    runs-on: ubuntu-latest  
+    steps:
         - name: Docker Setup Buildx 
           uses: docker/setup-buildx-action@v3.11.1
 
@@ -65,7 +73,10 @@ jobs:
               springpetclinic:${{ github.sha }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
-
+security Scan and Push image to ECR:
+    needs: Build  Docker Image 
+    runs-on: ubuntu-latest  
+    steps:
         - name: Scan Docker image (Trivy)
           uses: aquasecurity/trivy-action@master
           with:

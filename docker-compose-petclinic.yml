@@ -1,7 +1,7 @@
 services:
   
   myapp:
-    image: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic
+    image: deaddeal96/spring-petclinic:latest
     build:
       context: .
       dockerfile: Dockerfile.multistage
