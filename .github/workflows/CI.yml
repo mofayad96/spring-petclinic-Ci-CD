@@ -104,24 +104,23 @@ jobs:
         uses: sigstore/cosign-installer@v3.7.0
         with:
           cosign-release: 'v2.4.0'
-      
+
       - name: Sign Docker image with Cosign (Keyless)
         run: |
           cosign sign --yes \
-            --recursive \
             ${{ steps.push-to-ecr.outputs.ECR_IMAGE }}
         env:
           COSIGN_EXPERIMENTAL: true
-      
+
       - name: Verify Cosign signature
         run: |
-          cosign verify --yes \
+          cosign verify \
             ${{ steps.push-to-ecr.outputs.ECR_IMAGE }} \
             --certificate-identity-regexp="https://github.com/${{ github.repository }}/\.github/workflows/.*" \
             --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
         env:
           COSIGN_EXPERIMENTAL: true
-      
+            
       - name: Notify Slack
         uses: slackapi/slack-github-action@v1.27.0
         if: always()
