@@ -209,36 +209,30 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: true
 
-      - name: Update dev image tag
+      - name: Update gitops image tag
         run: |
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gitops-repo
+          cd gitops-repo
+          git checkout gitops
+          
           python3 - <<'PY'
           from pathlib import Path
-
-          path = Path("k8s/petclinic-chart/values-dev.yaml")
+          path = Path("k8s/petclinic-chart/values.yaml")
           tag = "${{ github.sha }}"
           lines = path.read_text().splitlines()
-
           for index, line in enumerate(lines):
               if line.strip().startswith("tag:"):
                   indent = line[:len(line) - len(line.lstrip())]
                   lines[index] = f'{indent}tag: "{tag}"'
                   break
-          else:
-              raise SystemExit("image tag field not found in values-dev.yaml")
-
           path.write_text("\n".join(lines) + "\n")
           PY
 
-          if git diff --quiet -- k8s/petclinic-chart/values-dev.yaml; then
-            echo "values-dev.yaml already points at ${{ github.sha }}"
-            exit 0
-          fi
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add k8s/petclinic-chart/values-dev.yaml
+          git add k8s/petclinic-chart/values.yaml
           git commit -m "chore(gitops): deploy image ${{ github.sha }}"
-          git push origin HEAD:main
+          git push origin gitops
 
       - name: Notify Slack
         uses: slackapi/slack-github-action@v1.27.0

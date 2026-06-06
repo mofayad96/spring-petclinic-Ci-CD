@@ -35,8 +35,9 @@ resource "helm_release" "petclinic_bootstrap" {
         project: default
         source:
           repoURL: ${var.repo_url}
-          targetRevision: HEAD
+          targetRevision: gitops
           path: k8s/petclinic-chart
+
           helm:
             valueFiles:
               - values.yaml
