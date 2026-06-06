@@ -1,10 +1,10 @@
 services:
   
   myapp:
-    image: themoosalah/spring-app:10.0
+    image: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/springpetclinic
     build:
       context: .
-      dockerfile: Dockerfile.multi
+      dockerfile: Dockerfile.multistage
     container_name: spring-petclinic-app
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/petclinic
@@ -20,7 +20,7 @@ services:
 
   #========================================================
   mysql:
-    image: mysql:9.2
+    image: mysql:8.0
     container_name: mysql-db
     environment:
       MYSQL_ROOT_PASSWORD: root
