@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  spring-petclinic-CI-CD:
+  Build-and-Test code using Maven:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
@@ -38,7 +38,7 @@ jobs:
         if: always()  # Upload even if tests fail
 
   build-docker-image:
-    needs: spring-petclinic-CI-CD
+    needs: Build-and-Test code using Maven
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
