@@ -26,6 +26,3 @@ resource "aws_eks_node_group" "nodes" {
   instance_types = ["t3.small"]
 }
 
-resource "aws_ecr_repository" "repo" {
-  name = "springpetclinic"
-}

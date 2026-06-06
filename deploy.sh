@@ -44,8 +44,6 @@ cluster_name       = "$CLUSTER_NAME"
 EOF
 
 terraform init
-# Handle existing ECR repo
-terraform import aws_ecr_repository.repo springpetclinic || true
 terraform apply -auto-approve
 cd ../..
 
