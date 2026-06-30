@@ -90,6 +90,7 @@ echo "📊 Step 3: Installing Monitoring Stack..."
 helm upgrade --install kube-prometheus-stack kube-prometheus-stack \
   --repo https://prometheus-community.github.io/helm-charts \
   --namespace monitoring --create-namespace \
+  -f monitoring/values.yaml \
   --wait --timeout 5m
 
 echo "  - Applying Grafana dashboard and Prometheus rules..."

@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/prometheusrule_v1.json
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: petclinic-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: petclinic.rules
+      rules:
+        - alert: PetClinicDown
+          expr: up{job="petclinic-service"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "PetClinic instance is down"
+            description: "PetClinic pod {{ $labels.pod }} has been down for more than 1 minute."
+        - alert: PetClinicHighResponseTime
+          expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job="petclinic-service"}[5m])) by (le)) > 2
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PetClinic high response time"
+            description: "95th percentile response time is above 2 seconds for more than 5 minutes."
+        - alert: PetClinicHighErrorRate
+          expr: sum(rate(http_server_requests_seconds_count{job="petclinic-service", status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count{job="petclinic-service"}[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PetClinic high error rate"
+            description: "More than 5% of requests are returning 5xx errors."
