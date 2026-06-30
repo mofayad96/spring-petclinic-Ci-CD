@@ -178,3 +178,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# Storage settings for MySQL StatefulSet
+mysqlStorage:
+  size: 5Gi
+  storageClassName: gp2
+
