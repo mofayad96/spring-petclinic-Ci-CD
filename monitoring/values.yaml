@@ -11,7 +11,7 @@ grafana:
   ingress:
     enabled: false
   persistence:
-    enabled: true
+    enabled: false
     storageClassName: "gp2"
     size: 2Gi
 
