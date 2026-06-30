@@ -85,13 +85,20 @@ kubectl wait --namespace ingress-nginx \
   --selector=app.kubernetes.io/component=controller \
   --timeout=120s
 
-# 3. Application Deployment
-echo "📦 Step 3: Deploying PetClinic Application (Managed by Argo CD)..."
-# cd k8s/petclinic-chart
-# helm upgrade --install petclinic . \
-#   --set image.repository=$ECR_URL \
-#   --set image.tag=latest
-# cd ../..
+# 3. Monitoring Stack (Prometheus + Grafana)
+echo "📊 Step 3: Installing Monitoring Stack..."
+helm upgrade --install kube-prometheus-stack kube-prometheus-stack \
+  --repo https://prometheus-community.github.io/helm-charts \
+  --namespace monitoring --create-namespace \
+  --wait --timeout 5m
+
+echo "  - Applying Grafana dashboard and Prometheus rules..."
+kubectl apply -f monitoring/grafana-dashboard-configmap.yaml
+kubectl apply -f monitoring/prometheus-rules.yaml
+kubectl apply -f monitoring/petclinic-service-monitor.yaml
+
+# 4. Application Deployment
+echo "📦 Step 4: Deploying PetClinic Application (Managed by Argo CD)..."
 
 echo "=============================================================================="
 echo "✅ Deployment Complete!"
