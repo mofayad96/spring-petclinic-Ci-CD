@@ -14,8 +14,18 @@ spec:
       labels:
         app: mysql
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
       containers:
       - name: mysql-db
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
         image: "{{ .Values.mysqlImage.repository }}:{{ .Values.mysqlImage.tag }}"
         ports:
         - containerPort: 3306
