@@ -13,9 +13,13 @@ RUN mvn package -DskipTests
 
 FROM  eclipse-temurin:17-jre-jammy
 
+RUN groupadd -r -g 1001 petclinic && useradd -r -u 1001 -g petclinic petclinic
+
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build --chown=petclinic:petclinic /app/target/*.jar app.jar
+
+USER petclinic
 
 EXPOSE 8080
 
