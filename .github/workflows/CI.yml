@@ -89,7 +89,7 @@ jobs:
             ${{ runner.os }}-trivy-
 
       - name: Scan Docker image (Trivy)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: springpetclinic:${{ github.sha }}
           format: table
@@ -140,6 +140,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
      
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
      
       - name: Build and tag image
@@ -163,7 +164,7 @@ jobs:
             ${{ runner.os }}-trivy-
       
       - name: Scan Docker image (Trivy)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: springpetclinic:${{ github.sha }}
           format: table
@@ -183,7 +184,7 @@ jobs:
       - name: Tag and push to ECR
         id: push-to-ecr
         run: |
-          ECR=184574354202.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/springpetclinic
+          ECR=${{ steps.login-ecr.outputs.registry }}/springpetclinic
           docker tag springpetclinic:${{ github.sha }} $ECR:${{ github.sha }}
           docker push $ECR:${{ github.sha }}
           echo "ECR_IMAGE=$ECR:${{ github.sha }}" >> $GITHUB_OUTPUT

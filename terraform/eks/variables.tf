@@ -34,3 +34,13 @@ variable "min_size" {
   type    = number
   default = 1
 }
+
+variable "node_group_name" {
+  type    = string
+  default = "springpetclinic-nodes"
+}
+
+variable "log_retention_in_days" {
+  type    = number
+  default = 7
+}

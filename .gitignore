@@ -79,9 +79,9 @@ terraform.rc
 .terraform/.terraform
 
 # Local docs excluded from repository
-README.md
 RECOMMENDED_UPDATES.md
 recommended_updates.md
 
-RECOMMENDED_UPDATES.md
+# Helm rendered outputs
+k8s/petclinic-chart/rendered.yaml
 destroy.sh

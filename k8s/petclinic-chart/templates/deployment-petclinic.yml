@@ -32,7 +32,7 @@ spec:
           value: "petclinic"
         - name: SPRING_DATASOURCE_PASSWORD
           value: "petclinic"
-        - name: SPRING_PROFILES_ACTIVEDB
+        - name: SPRING_PROFILES_ACTIVE
           value: "mysql"
 ---
 apiVersion: v1
