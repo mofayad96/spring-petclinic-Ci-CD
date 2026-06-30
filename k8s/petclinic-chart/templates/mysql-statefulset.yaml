@@ -1,10 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: mysql-deployment
+  name: mysql-statefulset
   labels:
     app: mysql
 spec:
+  serviceName: mysql-service
   replicas: 1
   selector:
     matchLabels:
@@ -29,6 +30,7 @@ spec:
         image: "{{ .Values.mysqlImage.repository }}:{{ .Values.mysqlImage.tag }}"
         ports:
         - containerPort: 3306
+          name: mysql
         env:
         - name: MYSQL_ROOT_PASSWORD 
           valueFrom: 
@@ -50,6 +52,18 @@ spec:
             secretKeyRef:
               name: mysql-secret
               key: mysql-db
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-persistent-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "{{ .Values.mysqlStorage.storageClassName }}"
+      resources:
+        requests:
+          storage: "{{ .Values.mysqlStorage.size }}"
 ---
 apiVersion: v1
 kind: Service
