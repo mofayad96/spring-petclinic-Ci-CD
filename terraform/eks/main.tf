@@ -25,6 +25,21 @@ resource "aws_eks_node_group" "nodes" {
   }
 
   instance_types = var.node_instance_types
+
+  launch_template {
+    name    = aws_launch_template.nodes.name
+    version = aws_launch_template.nodes.default_version
+  }
+}
+
+resource "aws_launch_template" "nodes" {
+  name = "${var.cluster_name}-node-template"
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 2
+    http_tokens                 = "required"
+  }
 }
 
 resource "aws_eks_addon" "ebs_csi" {

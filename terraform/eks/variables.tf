@@ -17,7 +17,7 @@ variable "private_subnet_ids" {
 
 variable "node_instance_types" {
   type    = list(string)
-  default = ["t3.small"]
+  default = ["m7i-flex.large"]
 }
 
 variable "desired_size" {
