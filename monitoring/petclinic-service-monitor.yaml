@@ -11,8 +11,10 @@ spec:
       app: petclinic
   namespaceSelector:
     matchNames:
-      - default
+      - dev
+      - staging
+      - prod
   endpoints:
-  - port: http
-    path: /actuator/prometheus
-    interval: 30s
+    - port: http
+      path: /actuator/prometheus
+      interval: 30s
