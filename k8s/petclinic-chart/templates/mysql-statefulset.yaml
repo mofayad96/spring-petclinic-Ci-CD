@@ -31,6 +31,26 @@ spec:
         ports:
         - containerPort: 3306
           name: mysql
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          {{- toYaml .Values.mysqlResources | nindent 10 }}
         env:
         - name: MYSQL_ROOT_PASSWORD 
           valueFrom: 

@@ -1,0 +1,39 @@
+{{- if .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: petclinic-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: petclinic
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow ingress traffic to Petclinic on port 8080
+  - ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mysql-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: mysql
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow database access only from PetClinic pods on port 3306
+  - from:
+    - podSelector:
+        matchLabels:
+          app: petclinic
+    ports:
+    - protocol: TCP
+      port: 3306
+{{- end }}
