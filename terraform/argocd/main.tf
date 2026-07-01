@@ -32,24 +32,22 @@ resource "helm_release" "petclinic_environments" {
     applicationsets:
       - name: petclinic-environments
         namespace: argocd
+        goTemplate: true
         generators:
           - list:
               elements:
                 - env: dev
                   namespace: dev
                   valuesFile: values-dev.yaml
-                  autoSync: "true"
                 - env: staging
                   namespace: staging
                   valuesFile: values-staging.yaml
-                  autoSync: "true"
                 - env: prod
                   namespace: prod
                   valuesFile: values-prod.yaml
-                  autoSync: "false"
         template:
           metadata:
-            name: "petclinic-{{env}}"
+            name: "petclinic-{{.env}}"
           spec:
             project: default
             source:
@@ -59,16 +57,24 @@ resource "helm_release" "petclinic_environments" {
               helm:
                 valueFiles:
                   - values.yaml
-                  - "{{valuesFile}}"
+                  - "{{.valuesFile}}"
                 parameters:
                   - name: image.repository
                     value: "${var.image_repository}"
             destination:
               server: https://kubernetes.default.svc
-              namespace: "{{namespace}}"
+              namespace: "{{.namespace}}"
             syncPolicy:
               syncOptions:
                 - CreateNamespace=true
+        templatePatch: |
+          {{- if ne .env "prod" }}
+          spec:
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
+          {{- end }}
     EOT
   ]
 }
