@@ -26,3 +26,9 @@ mysqlResources:
 # No autoscaling in dev
 autoscaling:
   enabled: false
+
+ingress:
+  hosts:
+    - host: dev.petclinic.local
+      path: /
+      pathType: Prefix

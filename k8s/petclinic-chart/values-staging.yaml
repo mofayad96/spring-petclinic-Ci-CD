@@ -21,3 +21,9 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
+
+ingress:
+  hosts:
+    - host: staging.petclinic.local
+      path: /
+      pathType: Prefix
