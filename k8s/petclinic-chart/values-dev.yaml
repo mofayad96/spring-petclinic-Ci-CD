@@ -4,7 +4,7 @@
 replicaCount: 1
 
 image:
-  tag: "a0f50673cb411ab69f624bd70d0dadc3e2b20e32"
+  tag: "512ab85de065c900f7b917b3eeee09a22edeb868"
 
 # Dev uses fewer resources
 resources:
