@@ -17,12 +17,28 @@ sleep 5
 echo "🎡 Step 0: Connecting to Kubernetes Cluster..."
 aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME || echo "Could not update kubeconfig, cluster might already be gone."
 
-# 1. Clean up Kubernetes resources (Crucial for LoadBalancer cleanup)
+# 1. Clean up Kubernetes resources (Crucial for LoadBalancer and EBS Volume cleanup)
 echo "🧹 Step 1: Cleaning up Kubernetes-managed resources..."
+
+# Delete the ApplicationSets and Applications first to let ArgoCD delete the workloads cleanly
+echo "  - Deleting ArgoCD Applications and workloads (releasing EBS volumes)..."
+kubectl delete applicationset -n argocd --all || echo "No ApplicationSets found."
+kubectl delete applications -n argocd --all || echo "No Applications found."
+# Wait for workloads to be deleted
+echo "  - Waiting for workload deletion and volume detachments..."
+sleep 30
+
+# Delete target namespaces to trigger deletion of any remaining PVs/PVCs/LoadBalancers
+echo "  - Deleting dev, staging, and prod namespaces..."
+kubectl delete ns dev staging prod --timeout=60s || echo "Namespaces already deleted."
 
 # Uninstall Nginx Ingress (to remove its AWS LoadBalancer)
 echo "  - Uninstalling Nginx Ingress Controller..."
 helm uninstall ingress-nginx -n ingress-nginx || echo "Ingress-nginx not found or already uninstalled."
+
+# Uninstall kube-prometheus-stack (to release any PVs/PVCs)
+echo "  - Uninstalling Prometheus Monitoring Stack..."
+helm uninstall kube-prometheus-stack -n monitoring || echo "kube-prometheus-stack not found or already uninstalled."
 
 # Delete the ECR secret
 echo "  - Deleting ECR secret..."

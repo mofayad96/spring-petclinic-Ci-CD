@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths-ignore:
       - k8s/petclinic-chart/values-dev.yaml
+      - k8s/petclinic-chart/values-staging.yaml
+      - k8s/petclinic-chart/values-prod.yaml
   pull_request:
     branches: [main]
 jobs:
@@ -14,13 +16,13 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
-      
+
       - name: setup java jdk
         uses: actions/setup-java@v5.0.0
         with:
           java-version: 17
           distribution: temurin
-      
+
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -28,14 +30,10 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      
-      - name: build code using maven (skip tests)
-        run: mvn clean install -DskipTests
-      
-      - name: Run Tests
-        run: mvn test
-        continue-on-error: true
-      
+
+      - name: build and test code using maven
+        run: mvn clean install
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
@@ -88,16 +86,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
+      - name: Scan filesystem (Trivy)
+        uses: aquasecurity/trivy-action@v0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: table
+          severity: CRITICAL
+          exit-code: 1
+          cache-dir: ~/.cache/trivy
+
       - name: Scan Docker image (Trivy)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: springpetclinic:${{ github.sha }}
           format: table
           severity: CRITICAL
-          exit-code: 0
+          exit-code: 1
           output: trivy-report.txt
           cache-dir: ~/.cache/trivy
-        continue-on-error: true
 
       - name: Upload Trivy report
         uses: actions/upload-artifact@v4
@@ -117,7 +124,7 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
-      
+
       - name: Cache Docker layers
         uses: actions/cache@v4
         with:
@@ -125,23 +132,24 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
-      
+
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v3.11.1
         with:
           driver-opts: |
             image=moby/buildkit:latest
             network=host
-      
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
-     
+
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-     
+
       - name: Build and tag image
         uses: docker/build-push-action@v6
         with:
@@ -153,7 +161,7 @@ jobs:
             springpetclinic:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      
+
       - name: Cache Trivy database
         uses: actions/cache@v4
         with:
@@ -161,37 +169,46 @@ jobs:
           key: ${{ runner.os }}-trivy-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-trivy-
-      
+
+      - name: Scan filesystem (Trivy)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: table
+          severity: CRITICAL
+          exit-code: 1
+          cache-dir: ~/.cache/trivy
+
       - name: Scan Docker image (Trivy)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: springpetclinic:${{ github.sha }}
           format: table
           severity: CRITICAL
-          exit-code: 0
+          exit-code: 1
           output: trivy-report.txt
           cache-dir: ~/.cache/trivy
-        continue-on-error: true
-     
+
       - name: Upload Trivy report
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report-petclinic
           path: ${{ github.workspace }}/trivy-report.txt
         if: always()
-      
+
       - name: Tag and push to ECR
         id: push-to-ecr
         run: |
-          ECR=184574354202.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/springpetclinic
+          ECR=${{ steps.login-ecr.outputs.registry }}/springpetclinic
           docker tag springpetclinic:${{ github.sha }} $ECR:${{ github.sha }}
           docker push $ECR:${{ github.sha }}
           echo "ECR_IMAGE=$ECR:${{ github.sha }}" >> $GITHUB_OUTPUT
-      
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: 'v2.4.0'
+          cosign-release: "v2.4.0"
 
       - name: Sign Docker image with Cosign (Keyless)
         run: |
@@ -209,29 +226,30 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: true
 
-      - name: Update gitops image tag
+      - name: Update gitops image tag (auto-deploy to dev)
         run: |
           git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gitops-repo
           cd gitops-repo
           git checkout gitops
-          
+
           python3 - <<'PY'
           from pathlib import Path
-          path = Path("k8s/petclinic-chart/values.yaml")
           tag = "${{ github.sha }}"
-          lines = path.read_text().splitlines()
+          # Update dev environment values (auto-deploy)
+          dev_path = Path("k8s/petclinic-chart/values-dev.yaml")
+          lines = dev_path.read_text().splitlines()
           for index, line in enumerate(lines):
               if line.strip().startswith("tag:"):
                   indent = line[:len(line) - len(line.lstrip())]
                   lines[index] = f'{indent}tag: "{tag}"'
                   break
-          path.write_text("\n".join(lines) + "\n")
+          dev_path.write_text("\n".join(lines) + "\n")
           PY
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add k8s/petclinic-chart/values.yaml
-          git commit -m "chore(gitops): deploy image ${{ github.sha }}"
+          git add k8s/petclinic-chart/values-dev.yaml
+          git commit -m "chore(gitops): deploy image ${{ github.sha }} to dev"
           git push origin gitops
 
       - name: Notify Slack
@@ -244,4 +262,3 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          
