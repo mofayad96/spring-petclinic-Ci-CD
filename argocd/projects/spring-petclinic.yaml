@@ -8,7 +8,11 @@ spec:
   sourceRepos:
     - https://github.com/mofayad96/spring-petclinic-Ci-CD.git
   destinations:
-    - namespace: petclinic
+    - namespace: dev
+      server: https://kubernetes.default.svc
+    - namespace: staging
+      server: https://kubernetes.default.svc
+    - namespace: prod
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: '*'
@@ -24,3 +28,13 @@ spec:
       kind: Secret
     - group: '*'
       kind: Service
+    - group: apps
+      kind: StatefulSet
+    - group: networking.k8s.io
+      kind: NetworkPolicy
+    - group: policy
+      kind: PodDisruptionBudget
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+    - group: argoproj.io
+      kind: Rollout

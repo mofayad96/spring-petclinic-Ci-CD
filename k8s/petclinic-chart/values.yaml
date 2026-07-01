@@ -12,7 +12,7 @@ image:
 
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0e369b685328d35d81c1e4efa36f147627c72f10"
+  tag: "latest"
 
 # Image settings for mysql-deployment.yaml
 mysqlImage:
@@ -201,5 +201,17 @@ networkPolicy:
 podDisruptionBudget:
   enabled: true
   maxUnavailable: 1
+
+# Argo Rollouts configuration
+rollout:
+  enabled: false
+  canary:
+    steps:
+      - setWeight: 10
+        duration: 30s
+      - setWeight: 30
+        duration: 30s
+      - setWeight: 60
+        duration: 30s
 
 
