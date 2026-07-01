@@ -11,49 +11,14 @@ This repository implements a production-grade, enterprise-ready DevOps platform 
 
 ## 🏗️ System Architecture
 
-The diagram below illustrates the end-to-end declarative lifecycle, showing how developer modifications trigger pipeline gates, image validation, GitOps syncing, progressive deployments, and monitoring loops.
+The platform operates on a fully automated, declarative lifecycle to ensure maximum security, scalability, and deployment reliability:
 
-```mermaid
-flowchart TD
-    subgraph Local ["Local Development"]
-        Dev[Developer] -->|Push Code / Open PR| GH[GitHub Repository]
-    end
-
-    subgraph CI ["Continuous Integration (GitHub Actions)"]
-        GH -->|Trigger Workflow| GHA[Runner]
-        GHA -->|1. Test & Build| MVN[Maven clean install]
-        GHA -->|2. AWS Auth| OIDC[AWS OIDC Integration]
-        GHA -->|3. Containerize| DKB[Buildx Multi-Stage Build]
-        GHA -->|4. Scan Filesystem & Image| TRV[Trivy Vulnerability Scan]
-        GHA -->|5. Tag & Push| ECR[(Amazon ECR)]
-        GHA -->|6. Cryptographic Sign| CSG[Cosign Keyless Signing]
-        GHA -->|7. Auto-Deploy Dev| GTO[Git Commit to gitops branch]
-    end
-
-    subgraph CD ["GitOps Continuous Delivery (ArgoCD)"]
-        GTO -->|Webhook / Poll| ACD[ArgoCD Controller]
-        ACD -->|Sync Target State| EKS[Amazon EKS Cluster]
-        
-        subgraph K8s ["EKS Internal Workloads"]
-            ING[Nginx Ingress] -->|Route Traffic| ARL[Argo Rollouts Controller]
-            ARL -->|Canary Routing| APP[Spring PetClinic Pods]
-            APP -->|Secure NetworkPolicy| STS[(MySQL StatefulSet)]
-            STS -->|Persistent Storage| EBS[AWS EBS CSI Driver PVC]
-        end
-    end
-
-    subgraph Mon ["Observability Stack"]
-        SRM[ServiceMonitor] -->|Metrics Scraping| PROM[Prometheus Operator]
-        PROM -->|Alerting| ALM[Alertmanager]
-        PROM -->|Data Source| GRAF[Grafana Dashboards]
-        GRAF -->|Visualize JVM / App Performance| Dev
-    end
-
-    style Local fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style CI fill:#e8f4fd,stroke:#1e88e5,stroke-width:2px
-    style CD fill:#fff3e0,stroke:#fb8c00,stroke-width:2px
-    style Mon fill:#eafaf1,stroke:#2ecc71,stroke-width:2px
-```
+*   **Continuous Integration & Gating (GitHub Actions):** Automatically executes **Maven test suites**, utilizes **Docker Buildx caching** for rapid builds, and triggers **Trivy vulnerability scans** on both the code repository and final image.
+*   **Zero-Trust Supply Chain Security:** Authenticates to AWS via **OIDC federation** (eliminating static credentials) and cryptographically signs images with **Cosign** (Sigstore/OIDC validation).
+*   **GitOps Continuous Delivery (ArgoCD):** Automatically reconciles the Kubernetes cluster state across **Dev, Staging, and Production environments** with self-healing and drift detection.
+*   **Progressive Canary Deployments (Argo Rollouts):** Manages production releases with a **10% -> 30% -> 60% traffic-weighted canary strategy** to validate releases before full cutover.
+*   **Production-Ready Kubernetes Resilience:** Enforces **HPA scaling (2-10 replicas)**, **NetworkPolicies for namespace isolation**, **PodDisruptionBudgets for high availability**, and a **MySQL StatefulSet backed by dynamic AWS EBS storage**.
+*   **Continuous Feedback & Monitoring:** Employs a **Prometheus ServiceMonitor** to scrap JVM metrics, feeding active **Grafana dashboards** and custom **Prometheus alerting rules**.
 
 ---
 
