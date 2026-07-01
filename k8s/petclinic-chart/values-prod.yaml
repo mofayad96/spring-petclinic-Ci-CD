@@ -1,0 +1,28 @@
+# Production environment overrides
+# Promoted manually from staging after approval
+
+replicaCount: 3
+
+image:
+  tag: "bd9c00a9e0cf1215b66ced9b4573b95263c26fcd"
+
+# Production uses full resources
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Production autoscaling with higher capacity
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+# PDB ensures availability during rolling updates
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
