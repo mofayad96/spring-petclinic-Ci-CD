@@ -32,3 +32,6 @@ ingress:
     - host: petclinic.local
       path: /
       pathType: Prefix
+
+rollout:
+  enabled: true

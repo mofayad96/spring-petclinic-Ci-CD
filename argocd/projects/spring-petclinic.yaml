@@ -36,3 +36,5 @@ spec:
       kind: PodDisruptionBudget
     - group: autoscaling
       kind: HorizontalPodAutoscaler
+    - group: argoproj.io
+      kind: Rollout

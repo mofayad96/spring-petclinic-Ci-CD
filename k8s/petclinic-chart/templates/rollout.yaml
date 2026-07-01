@@ -1,12 +1,16 @@
-{{- if not .Values.rollout.enabled }}
-apiVersion: apps/v1
-kind: Deployment
+{{- if .Values.rollout.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: petclinic-deployment
   labels:
     app: petclinic
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    canary:
+      steps:
+        {{- toYaml .Values.rollout.canary.steps | nindent 8 }}
   selector:
     matchLabels:
       app: petclinic
@@ -59,16 +63,3 @@ spec:
         - name: SPRING_PROFILES_ACTIVE
           value: "mysql"
 {{- end }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: petclinic-service
-spec:
-  selector:
-    app: petclinic
-  ports:
-    - name: http
-      protocol: TCP
-      port: {{  .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}

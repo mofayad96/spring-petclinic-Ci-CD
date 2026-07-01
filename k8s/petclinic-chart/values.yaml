@@ -202,4 +202,16 @@ podDisruptionBudget:
   enabled: true
   maxUnavailable: 1
 
+# Argo Rollouts configuration
+rollout:
+  enabled: false
+  canary:
+    steps:
+      - setWeight: 10
+        duration: 30s
+      - setWeight: 30
+        duration: 30s
+      - setWeight: 60
+        duration: 30s
+
 
