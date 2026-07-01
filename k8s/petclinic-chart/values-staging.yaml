@@ -4,7 +4,7 @@
 replicaCount: 2
 
 image:
-  tag: "bd9c00a9e0cf1215b66ced9b4573b95263c26fcd"
+  tag: "8a5d19bd13dc639dbb259ddacf1f7cfb4b34d813"
 
 # Staging uses moderate resources
 resources:
