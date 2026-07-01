@@ -214,7 +214,7 @@
               <configLocation>src/checkstyle/nohttp-checkstyle.xml</configLocation>
               <sourceDirectories>${basedir}</sourceDirectories>
               <includes>**/*</includes>
-              <excludes>**/.git/**/*,**/.idea/**/*,**/target/**/,**/.flattened-pom.xml,**/*.class,**/.terraform/**/*,**/.terraform.lock.hcl</excludes>
+              <excludes>**/.git/**/*,**/.idea/**/*,**/target/**/,**/.flattened-pom.xml,**/*.class,**/.terraform/**/*,**/.terraform.lock.hcl,**/kubectl-argo-rollouts*</excludes>
               <propertyExpansion>config_loc=${basedir}/src/checkstyle/</propertyExpansion>
             </configuration>
           </execution>

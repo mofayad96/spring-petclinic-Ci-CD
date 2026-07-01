@@ -31,8 +31,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: build code using maven (skip tests)
-        run: mvn clean install -DskipTests
+      - name: build and test code using maven
+        run: mvn clean install
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -86,16 +86,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
+      - name: Scan filesystem (Trivy)
+        uses: aquasecurity/trivy-action@v0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: table
+          severity: CRITICAL
+          exit-code: 1
+          cache-dir: ~/.cache/trivy
+
       - name: Scan Docker image (Trivy)
         uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: springpetclinic:${{ github.sha }}
           format: table
           severity: CRITICAL
-          exit-code: 0
+          exit-code: 1
           output: trivy-report.txt
           cache-dir: ~/.cache/trivy
-        continue-on-error: true
 
       - name: Upload Trivy report
         uses: actions/upload-artifact@v4
@@ -161,16 +170,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
+      - name: Scan filesystem (Trivy)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: table
+          severity: CRITICAL
+          exit-code: 1
+          cache-dir: ~/.cache/trivy
+
       - name: Scan Docker image (Trivy)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: springpetclinic:${{ github.sha }}
           format: table
           severity: CRITICAL
-          exit-code: 0
+          exit-code: 1
           output: trivy-report.txt
           cache-dir: ~/.cache/trivy
-        continue-on-error: true
 
       - name: Upload Trivy report
         uses: actions/upload-artifact@v4
