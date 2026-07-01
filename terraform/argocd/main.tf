@@ -17,9 +17,9 @@ resource "helm_release" "argocd" {
   }
 }
 
-# Argo CD Application for bootstrapping the PetClinic app
-resource "helm_release" "petclinic_bootstrap" {
-  name       = "petclinic-bootstrap"
+# Argo CD ApplicationSet for multi-environment deployment (dev, staging, prod)
+resource "helm_release" "petclinic_environments" {
+  name       = "petclinic-environments"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argocd-apps"
   namespace  = kubernetes_namespace.argocd.metadata[0].name
@@ -29,30 +29,47 @@ resource "helm_release" "petclinic_bootstrap" {
 
   values = [
     <<-EOT
-    applications:
-      - name: petclinic-bootstrap
+    applicationsets:
+      - name: petclinic-environments
         namespace: argocd
-        project: default
-        source:
-          repoURL: ${var.repo_url}
-          targetRevision: gitops
-          path: k8s/petclinic-chart
-
-          helm:
-            valueFiles:
-              - values.yaml
-            parameters:
-              - name: image.repository
-                value: "${var.image_repository}"
-        destination:
-          server: https://kubernetes.default.svc
-          namespace: default
-        syncPolicy:
-          automated:
-            prune: true
-            selfHeal: true
-          syncOptions:
-            - CreateNamespace=true
+        generators:
+          - list:
+              elements:
+                - env: dev
+                  namespace: dev
+                  valuesFile: values-dev.yaml
+                  autoSync: "true"
+                - env: staging
+                  namespace: staging
+                  valuesFile: values-staging.yaml
+                  autoSync: "true"
+                - env: prod
+                  namespace: prod
+                  valuesFile: values-prod.yaml
+                  autoSync: "false"
+        template:
+          metadata:
+            name: "petclinic-{{env}}"
+          spec:
+            project: default
+            source:
+              repoURL: ${var.repo_url}
+              targetRevision: gitops
+              path: k8s/petclinic-chart
+              helm:
+                valueFiles:
+                  - values.yaml
+                  - "{{valuesFile}}"
+                parameters:
+                  - name: image.repository
+                    value: "${var.image_repository}"
+            destination:
+              server: https://kubernetes.default.svc
+              namespace: "{{namespace}}"
+            syncPolicy:
+              syncOptions:
+                - CreateNamespace=true
     EOT
   ]
 }
+

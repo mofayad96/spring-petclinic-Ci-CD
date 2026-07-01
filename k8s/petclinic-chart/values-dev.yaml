@@ -1,2 +1,28 @@
+# Dev environment overrides
+# CI automatically updates image.tag here on every push to main
+
+replicaCount: 1
+
 image:
   tag: "bd9c00a9e0cf1215b66ced9b4573b95263c26fcd"
+
+# Dev uses fewer resources
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+mysqlResources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# No autoscaling in dev
+autoscaling:
+  enabled: false

@@ -1,0 +1,23 @@
+# Staging environment overrides
+# Promoted manually from dev after verification
+
+replicaCount: 2
+
+image:
+  tag: "bd9c00a9e0cf1215b66ced9b4573b95263c26fcd"
+
+# Staging uses moderate resources
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 200m
+    memory: 512Mi
+
+# Autoscaling enabled in staging for load testing
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
