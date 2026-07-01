@@ -4,7 +4,7 @@
 replicaCount: 1
 
 image:
-  tag: "99ab9af3ab14bd82abb30835c61fc273309b7299"
+  tag: "bd9c00a9e0cf1215b66ced9b4573b95263c26fcd"
 
 # Dev uses fewer resources
 resources:
@@ -26,3 +26,9 @@ mysqlResources:
 # No autoscaling in dev
 autoscaling:
   enabled: false
+
+ingress:
+  hosts:
+    - host: dev.petclinic.local
+      path: /
+      pathType: Prefix
