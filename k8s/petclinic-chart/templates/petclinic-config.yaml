@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: petclinic-config
+data:
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
+  SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-service:3306/petclinic"
+  SPRING_PROFILES_ACTIVE: "mysql"

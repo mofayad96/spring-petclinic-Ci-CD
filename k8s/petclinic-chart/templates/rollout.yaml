@@ -47,9 +47,15 @@ spec:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
         - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
-          value: com.mysql.cj.jdbc.Driver
+          valueFrom:
+            configMapKeyRef:
+              name: petclinic-config
+              key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mysql://mysql-service:3306/petclinic"
+          valueFrom:
+            configMapKeyRef:
+              name: petclinic-config
+              key: SPRING_DATASOURCE_URL
         - name: SPRING_DATASOURCE_USERNAME
           valueFrom:
             secretKeyRef:
@@ -61,5 +67,8 @@ spec:
               name: mysql-secret
               key: mysql-password
         - name: SPRING_PROFILES_ACTIVE
-          value: "mysql"
+          valueFrom:
+            configMapKeyRef:
+              name: petclinic-config
+              key: SPRING_PROFILES_ACTIVE
 {{- end }}
